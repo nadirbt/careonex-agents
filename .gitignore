@@ -1,0 +1,26 @@
+# Python virtual environments
+.venv/
+venv/
+env/
+# stray venvs from shell mistakes (folders containing pyvenv.cfg)
+pyvenv.cfg
+
+# Byte-compiled / caches
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environment / secrets — never commit AWS keys
+.env
+.env.*
+.aws/
+*.pem
+
+# OS / editor
+.DS_Store
+.python-version
+.idea/
+.vscode/
