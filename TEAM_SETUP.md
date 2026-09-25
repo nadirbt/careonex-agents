@@ -4,7 +4,7 @@ Purpose: let every teammate run the CareOneX voice agent locally against the **s
 
 This is written so it can be executed live in a meeting. It has three parts:
 
-- **Part A — Account owner (PhD / root):** one-time account setup.
+- **Part A — Account owner (Nadir / root):** one-time account setup.
 - **Part B — Per teammate:** what the owner creates for each of us.
 - **Part C — Each teammate's laptop:** run the voice agent locally.
 
@@ -168,7 +168,7 @@ export AWS_PROFILE=careonex-team
 
 ---
 
-## Message to send the PhD (copy/paste)
+## Message to send Nadir (copy/paste)
 
 > For today: can we set up team AWS access for the CareOneX voice agent? It only needs Amazon **Nova 2 Sonic** in **us-east-1**.
 >
