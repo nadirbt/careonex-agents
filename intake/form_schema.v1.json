@@ -1,0 +1,123 @@
+{
+  "_meta": {
+    "version": 1,
+    "captured_date": "2026-09-28",
+    "source": "CareOneX internal phone-intake form, navigated section by section by the team (not the public careonex.com web form)",
+    "note": "This is the record an intake worker -- and eventually the agent's stage-6 'Wrap-up' extraction -- fills in about what was learned on the call. It is NOT the public web form that captures initial consent to be contacted; that is a separate, upstream artifact. See intake/README.md."
+  },
+  "documents_or_uploads_required": [],
+  "explicitly_required_fields": [
+    "client.first_name",
+    "client.last_name",
+    "client.phone"
+  ],
+  "sections": {
+    "intake": {
+      "required_information": [
+        "name_or_title_of_person_taking_information",
+        "start_of_care_date"
+      ]
+    },
+    "client": {
+      "required_information": [
+        "first_name",
+        "last_name",
+        "phone"
+      ],
+      "additional_information": [
+        "date_of_birth",
+        "gender",
+        "marital_status",
+        "care_type",
+        "address_line_1",
+        "address_line_2",
+        "city",
+        "state",
+        "zip_code",
+        "zip_code_verification"
+      ]
+    },
+    "contacts": {
+      "contacts_to_collect": [
+        {
+          "type": "information_provider",
+          "fields": ["name", "phone", "relationship"]
+        },
+        {
+          "type": "emergency_contact",
+          "fields": ["name", "phone", "relationship"]
+        },
+        {
+          "type": "collateral_contact",
+          "fields": ["name", "phone", "relationship"]
+        }
+      ]
+    },
+    "services_and_referral": {
+      "service_requested": [
+        "PCS / CHHA",
+        "Skilled Nursing (CBSN)",
+        "Companion"
+      ],
+      "information": [
+        "requested_days_or_hours",
+        "requested_start_date",
+        "setting",
+        "special_skills_or_certifications_required",
+        "special_employer_policies_or_limitations",
+        "client_living_situation",
+        "languages_spoken",
+        "translator_needed",
+        "referral_source",
+        "reason_for_referral",
+        "physician_name",
+        "physician_specialty",
+        "physician_phone"
+      ]
+    },
+    "medical": {
+      "information": [
+        "past_medical_history",
+        "medical_or_nursing_diagnosis",
+        "medications",
+        "known_allergies",
+        "advance_directive_status",
+        "diet",
+        "emergency_priority_code",
+        "financial_or_insurance_type",
+        "Medicaid_MLTSS_plan",
+        "other_financial_information"
+      ]
+    },
+    "functional_status": {
+      "information": [
+        "mobility",
+        "equipment_in_home",
+        "equipment_supplier",
+        "ADL_assistance_needed",
+        "IADL_assistance_needed",
+        "transportation",
+        "vision",
+        "hearing",
+        "hearing_aids",
+        "speech",
+        "alert_awake_oriented_status",
+        "explanation_if_not_oriented",
+        "memory_issues",
+        "other_memory_information",
+        "incontinence_status",
+        "incontinence_type",
+        "current_services_in_place",
+        "explanation_of_current_services"
+      ]
+    },
+    "summary": {
+      "required_information": [
+        "pertinent_information_for_level_of_care_appropriateness",
+        "notes",
+        "signature_or_title_of_person_taking_information",
+        "date"
+      ]
+    }
+  }
+}
