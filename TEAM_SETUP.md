@@ -1,36 +1,41 @@
-# CareOneX — Team AWS Setup Playbook
+# CareOneX — Team AWS Setup (as built)
 
-Purpose: let every teammate run the CareOneX voice agent locally against the **shared team AWS account** (with shared Bedrock credits), instead of each person using a personal account.
+Purpose: every teammate runs the CareOneX voice agent locally against the **shared team AWS account** (shared Bedrock credits), with no personal AWS account and no long-lived keys.
 
-This is written so it can be executed live in a meeting. It has three parts:
+**Status (2026-09-29): the account side is done.** Identity Center is enabled, the `AC215` permission set and group exist, all four teammates are in the group, and the model is active. What remains is each teammate's laptop (Part C).
 
-- **Part A — Account owner (Nadir / root):** one-time account setup.
-- **Part B — Per teammate:** what the owner creates for each of us.
-- **Part C — Each teammate's laptop:** run the voice agent locally.
-
-The app only needs permission to call one model, **Amazon Nova 2 Sonic**, in **us-east-1**. Nothing here touches the existing frontend/backend.
+The app only needs permission to call one model, **Amazon Nova 2 Sonic**, in **us-east-1**. Nothing here touches the CareOneX phone line, API, database or recordings; the permission set cannot reach them.
 
 ---
 
-## Key concepts (1 minute)
+## What was set up
 
-- **One team account** holds the resources and the **shared credits**. Teammates do **not** need personal AWS accounts.
-- Each teammate gets an **identity** in that account plus a **permission set / policy**. Two supported options:
-  - **IAM Identity Center (SSO)** — recommended. You log in (browser), AWS mints **temporary** keys that expire. Safer, no long-lived secrets.
-  - **IAM user** — simpler. Long-lived access key + secret per person.
-- Local experiments work with **either** option because they both end up as standard AWS credentials on your laptop.
+| Item | Value |
+| --- | --- |
+| Team account id | `117949645823` |
+| Identity Center | Enabled **with AWS Organizations**, primary region `us-east-1` |
+| Access portal URL | `https://d-906661b099.awsapps.com/start` |
+| Permission set | `AC215` (8-hour session, one inline policy, below) |
+| Group | `AC215`, assigned to the team account with the `AC215` permission set |
+| Members | See the table below (username = e-mail) |
+| MFA | Required on every sign-in; authenticator app and security key/Touch ID both allowed; device enrolment forced at first sign-in |
+| Model | `amazon.nova-2-sonic-v1:0` is **active and authorized** in us-east-1 (no model-access toggle left to flip) |
+| Budget | `AC215-Bedrock-Monthly`: **$30/month** on Amazon Bedrock, alerts to the owner at 50%, 80%, 100% actual and 100% forecast (created 2026-09-29). The account also has a $200/month all-services budget. |
 
-> Root user is for account setup only. After Part A, the owner should operate as an admin identity, not root.
+### Members of `AC215`
 
----
+Each user's Identity Center username is their e-mail address. This is the address they sign in with at the portal and the one the password-reset e-mail went to.
 
-## Part A — Account owner (do once)
+| Name | E-mail / username |
+| --- | --- |
+| Caroline Li | `zhl671@g.harvard.edu` |
+| Helen Jin | `helenjin@g.harvard.edu` |
+| Junyi Zhou | `junyizhou@hsph.harvard.edu` |
+| Marco Ren | `mren@g.harvard.edu` |
 
-Pick **A1 (SSO, recommended)** or **A2 (IAM users, simpler)**.
+### The `AC215` inline policy
 
-### Least-privilege policy for the voice agent
-
-Create a customer-managed policy named **`CareOneXNovaSonic`** with this JSON. The app uses the bidirectional streaming action; `InvokeModel` is included for quick tests.
+This is the entire set of permissions a teammate has. Two Bedrock actions on one model ARN in one region. No billing, no console resources, no other models.
 
 ```json
 {
@@ -49,34 +54,53 @@ Create a customer-managed policy named **`CareOneXNovaSonic`** with this JSON. T
 }
 ```
 
-Also enable **model access** once for the account: Bedrock console → **Model access** → enable **Amazon Nova 2 Sonic** in **us-east-1**.
+### Decisions made, and why
 
-### A1 — IAM Identity Center (SSO), recommended
+- **Identity Center (SSO) only. No IAM users.** Temporary keys, MFA, one place to revoke. Long-lived keys on laptops are what the account's audit baseline exists to avoid.
+- **Identities live in the production account**, not a separate member account. Acceptable for a course team calling one model with synthetic audio, because the policy is a data-path dead end. The mitigations that make it a good choice: MFA Required (done), the $30/month Bedrock budget (done, see Cost), and **never widening `AC215` in place**. Move to a member account under the organization if the team grows, the agent starts handling real calls, or someone else needs admin rights.
+- **Root is for setup only.** The owner should operate through an admin permission set from now on, never root.
 
-1. Enable **IAM Identity Center** (same region hub is fine; the model call is still us-east-1).
-2. **Permission set** → create `CareOneXVoice`. Attach the **`CareOneXNovaSonic`** policy (as a customer-managed or inline policy). Set session duration (e.g. 8 hours).
-3. **Users** → create one per teammate using their **work email** (this is just a login identifier).
-4. **AWS accounts** → select the team account → **Assign users** → pick the teammate → attach the **`CareOneXVoice`** permission set.
-5. Give teammates the **Start URL** (looks like `https://d-xxxx.awsapps.com/start`) and the **SSO region**.
+### What teammates can see and do
 
-Each teammate then gets an email invite to set password + MFA.
+- **Can see:** one entry in the access portal (the account's name and id) with one role, `AC215`. From a terminal, `aws sts get-caller-identity` shows the account id and their own role name.
+- **Can do:** call Nova 2 Sonic in us-east-1. Every other Bedrock model is refused.
 
-### A2 — IAM users (simpler fallback)
+---
 
-1. **IAM → User groups** → create `careonex-voice`. Attach **`CareOneXNovaSonic`**.
-2. **IAM → Users** → create one user per teammate (e.g. `conny`), **no console access needed**, add to group `careonex-voice`.
-3. For each user: **Security credentials → Access keys → Create access key → CLI**.
-4. Send each teammate **their** access key + secret **securely** (password manager / one-time link) — never in chat or git.
+## Part A — Owner: adding, removing and changing access
+
+Everything here is in **IAM Identity Center** in the console, region `us-east-1`.
+
+### Add a teammate (about one minute)
+
+1. **Users → Add user.** Username = their e-mail. Fill first name, last name, e-mail. Leave **Send an email invitation** on.
+2. Under **Add user to groups**, tick **`AC215`**. Add user.
+3. Send them the four lines from **Part B** yourself. The AWS invite e-mail does not include them.
+
+> If a user was created from the command line instead of the console form, they get **no** invitation e-mail. Open **Users → the person → Reset password → "Send an email to the user with instructions for resetting the password"**. The e-mail verification link alone is not enough: it proves the address but does not set a password. The reset-password flow sets the password and forces MFA enrolment in the same pass. This was done for all four current members on 2026-09-29.
+
+### Remove a teammate
+
+**Groups → AC215 → Remove user**, or **Users → the person → Disable**. Their temporary keys die within the 8-hour session length.
+
+### Change what the permission set allows
+
+**Permission sets → AC215 → Inline policy → Edit**, save, then click **Reprovision** in the yellow banner. Everyone in the group gets the new policy at their next sign-in. Prefer not to widen it; if the team needs more, that is the signal to create a member account instead.
 
 ---
 
 ## Part B — What each teammate receives
 
-From **A1 (SSO)**: an **email invite**, the **Start URL**, and the **SSO region**.
+Two things: the AWS password-reset (or invitation) e-mail, and this message from the owner:
 
-From **A2 (IAM user)**: their **access key id** + **secret access key** (securely), and the region `us-east-1`.
+```
+Portal:  https://d-906661b099.awsapps.com/start
+Region:  us-east-1
+Role:    AC215
+Profile: careonex-team   (aws configure sso, then aws sso login --profile careonex-team)
+```
 
-Everyone shares the **same account and credits**; billing is centralized on the owner's account.
+Open the AWS e-mail the same day; the link expires. If it has, use **Forgot password** at the portal URL, which sends a fresh one. The first sign-in sets your password and enrols an MFA device (authenticator app or Touch ID) in one flow.
 
 ---
 
@@ -86,90 +110,75 @@ Prereqs: macOS with Homebrew, Python 3.11/3.12, this repo cloned.
 
 ```bash
 brew install portaudio awscli
-cd CareOneX
+cd careonex-agents
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
 ```
 
-### C1 — If you were set up via SSO (A1)
+> SSO resolution in the app uses **botocore**, which is installed automatically with `awscli`. If you skipped `awscli`, run `pip install botocore` inside the venv.
 
-> SSO resolution in the app uses **botocore**, which is installed automatically with `awscli` (Part C prereqs). If you skipped `awscli`, `pip install botocore` into the venv.
+### C1 — Configure the SSO profile (once)
 
 ```bash
 aws configure sso
-# SSO start URL:   <paste Start URL>
-# SSO region:      <paste SSO region>
-# choose the team account and the CareOneXVoice role
+# SSO session name:  careonex
+# SSO start URL:     https://d-906661b099.awsapps.com/start
+# SSO region:        us-east-1
+# SSO registration scopes: (accept default)
+# -> browser opens; sign in with your Harvard e-mail + MFA
+# account:           117949645823 (the only one offered)
+# role:              AC215 (the only one offered)
 # CLI default region: us-east-1
 # CLI output format:  json
-# name the profile:   careonex-team
+# Profile name:       careonex-team
 ```
 
-Each working session:
+### C2 — Each working session
 
 ```bash
 aws sso login --profile careonex-team
 export AWS_PROFILE=careonex-team
 export AWS_DEFAULT_REGION=us-east-1
-aws sts get-caller-identity        # should show the TEAM account id
+aws sts get-caller-identity
 python -m nova_sonic
 ```
 
-SSO keys are temporary; re-run `aws sso login` when they expire. The app resolves SSO profiles automatically (botocore is installed with `awscli`).
+`get-caller-identity` must print account **`117949645823`** and an ARN whose role name contains **`AC215`**. Then the voice agent starts; speak after the "Listening" line.
 
-### C2 — If you were set up as an IAM user (A2)
+SSO keys are temporary (8 hours). When they expire, re-run `aws sso login --profile careonex-team`.
 
-```bash
-aws configure --profile careonex-team
-# AWS Access Key ID:     <your key>
-# AWS Secret Access Key: <your secret>
-# Default region:        us-east-1
-# Default output:        json
-```
+### Troubleshooting
 
-Each working session:
+- **The app exits with "Set AWS credentials first"** even though `get-caller-identity` works. The app's preflight looks for `~/.aws/credentials`, which `aws configure sso` does not create. Run `touch ~/.aws/credentials` once and start the app again; the SSO profile is resolved through botocore from `~/.aws/config`.
+- **It shows a different account id.** Stale personal keys in the environment win over the profile. Clear them:
 
-```bash
-export AWS_PROFILE=careonex-team
-export AWS_DEFAULT_REGION=us-east-1
-aws sts get-caller-identity        # should show the TEAM account id
-python -m nova_sonic
-```
+  ```bash
+  unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_SECURITY_TOKEN
+  export AWS_PROFILE=careonex-team
+  ```
 
-### Verify it's the team account, not your personal one
-
-`aws sts get-caller-identity` must show the **team account id**. If it shows your personal account, run:
-
-```bash
-unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_SECURITY_TOKEN
-export AWS_PROFILE=careonex-team
-```
-
-`InvalidClientTokenId` or `ExpiredToken` → re-auth (`aws sso login` for SSO) or re-check keys. The app's "Listening" line alone does **not** prove authentication.
-
----
-
-## Meeting agenda (suggested, ~20 min)
-
-1. Owner confirms **which team account** holds the credits (2 min).
-2. Owner enables **Bedrock model access** for Nova 2 Sonic in us-east-1 (2 min).
-3. Owner creates **`CareOneXNovaSonic`** policy (3 min).
-4. Choose **SSO (A1)** or **IAM users (A2)** and create identities for each teammate (8 min).
-5. One teammate does **Part C** live end-to-end as a smoke test (5 min).
+- **`ExpiredToken` / `InvalidClientTokenId`.** Re-run `aws sso login --profile careonex-team`.
+- **`AccessDeniedException` from Bedrock.** Check the model id is `amazon.nova-2-sonic-v1:0` and the region is `us-east-1`. Any other model or region is refused by design.
+- The app's "Listening" line alone does **not** prove authentication; the first real error arrives when audio is sent.
 
 ---
 
 ## Cost / credits
 
-- The shared credits sit in the **team account**; usage is billed centrally.
-- Nova 2 Sonic is billed per streamed audio/token usage. Keep test sessions short (the stream also caps around ~8 minutes).
-- Owner can watch **Billing → Cost Explorer**, filter to **Amazon Bedrock**, daily **Unblended cost**; credits offset but usage is still metered.
+- Credits sit in the team account and are billed centrally. Teammates cannot see credits or spend.
+- **Budget: `AC215-Bedrock-Monthly`, $30/month, filtered to the Amazon Bedrock service.** E-mails the owner at 50%, 80% and 100% of actual spend and when the month's forecast passes 100%. An AWS Budget alerts; it does not stop calls by itself.
 
----
+### What a call actually costs
 
-## Message to send Nadir (copy/paste)
+Nova 2 Sonic converts audio to speech tokens at 25 tokens per second. Speech input is $3 per million tokens, speech output $12 per million. Text tokens (system prompt, transcripts) are negligible. This app streams the microphone continuously, so **input is billed for the whole session, silence included**; output is billed only while the agent speaks.
 
-> For today: can we set up team AWS access for the CareOneX voice agent? It only needs Amazon **Nova 2 Sonic** in **us-east-1**.
->
-> Proposed: enable Bedrock model access for Nova 2 Sonic; create a policy `CareOneXNovaSonic` allowing `bedrock:InvokeModelWithBidirectionalStream` + `bedrock:InvokeModel` on that model; then give each of us access via **IAM Identity Center** (a `CareOneXVoice` permission set) — or IAM users if that's faster. Send us the SSO **Start URL + region** (or our IAM keys securely). We'll run it locally with `AWS_PROFILE=careonex-team`. Full steps are in `TEAM_SETUP.md`.
+| Scenario | Approximate cost |
+| --- | --- |
+| One 5-minute test session | $0.06 to $0.08 |
+| One hour of continuous conversation | $0.70 to $0.80 |
+| A forgotten stream (ends at the ~8-minute cap) | under $0.20 |
+| 4 teammates, 1 hour each per weekday for a month | about $60 |
+| Typical course pace, 2 to 3 hours per person per week | $30 to $40 per month |
+
+So the $30 budget covers normal course use; the alerts are there to catch a pattern change, not a single accident. Close the session (press Enter) when done anyway.
