@@ -10,14 +10,16 @@ The app only needs permission to call one model, **Amazon Nova 2 Sonic**, in **u
 
 ## What was set up
 
+> **Placeholders.** `<TEAM_ACCOUNT_ID>`, `<PORTAL_URL>` and teammates' e-mail addresses are deliberately not in this file. The owner keeps them in `TEAM_SETUP.private.md` (git-ignored) and sends them to each teammate directly.
+
 | Item | Value |
 | --- | --- |
-| Team account id | `117949645823` |
+| Team account id | `<TEAM_ACCOUNT_ID>` |
 | Identity Center | Enabled **with AWS Organizations**, primary region `us-east-1` |
-| Access portal URL | `https://d-906661b099.awsapps.com/start` |
+| Access portal URL | `<PORTAL_URL>` |
 | Permission set | `AC215` (8-hour session, one inline policy, below) |
 | Group | `AC215`, assigned to the team account with the `AC215` permission set |
-| Members | See the table below (username = e-mail) |
+| Members | See the table below (username = e-mail; addresses held privately) |
 | MFA | Required on every sign-in; authenticator app and security key/Touch ID both allowed; device enrolment forced at first sign-in |
 | Model | `amazon.nova-2-sonic-v1:0` is **active and authorized** in us-east-1 (no model-access toggle left to flip) |
 | Budget | `AC215-Bedrock-Monthly`: **$30/month** on Amazon Bedrock, alerts to the owner at 50%, 80%, 100% actual and 100% forecast (created 2026-09-29). The account also has a $200/month all-services budget. |
@@ -28,10 +30,10 @@ Each user's Identity Center username is their e-mail address. This is the addres
 
 | Name | E-mail / username |
 | --- | --- |
-| Caroline Li | `zhl671@g.harvard.edu` |
-| Helen Jin | `helenjin@g.harvard.edu` |
-| Junyi Zhou | `junyizhou@hsph.harvard.edu` |
-| Marco Ren | `mren@g.harvard.edu` |
+| Caroline Li | on file with the owner |
+| Helen Jin | on file with the owner |
+| Junyi Zhou | on file with the owner |
+| Marco Ren | on file with the owner |
 
 ### The `AC215` inline policy
 
@@ -94,7 +96,7 @@ Everything here is in **IAM Identity Center** in the console, region `us-east-1`
 Two things: the AWS password-reset (or invitation) e-mail, and this message from the owner:
 
 ```
-Portal:  https://d-906661b099.awsapps.com/start
+Portal:  <PORTAL_URL>
 Region:  us-east-1
 Role:    AC215
 Profile: careonex-team   (aws configure sso, then aws sso login --profile careonex-team)
@@ -123,11 +125,11 @@ python -m pip install -r requirements.txt
 ```bash
 aws configure sso
 # SSO session name:  careonex
-# SSO start URL:     https://d-906661b099.awsapps.com/start
+# SSO start URL:     <PORTAL_URL>
 # SSO region:        us-east-1
 # SSO registration scopes: (accept default)
 # -> browser opens; sign in with your Harvard e-mail + MFA
-# account:           117949645823 (the only one offered)
+# account:           <TEAM_ACCOUNT_ID> (the only one offered)
 # role:              AC215 (the only one offered)
 # CLI default region: us-east-1
 # CLI output format:  json
@@ -144,7 +146,7 @@ aws sts get-caller-identity
 python -m nova_sonic
 ```
 
-`get-caller-identity` must print account **`117949645823`** and an ARN whose role name contains **`AC215`**. Then the voice agent starts; speak after the "Listening" line.
+`get-caller-identity` must print account **`<TEAM_ACCOUNT_ID>`** and an ARN whose role name contains **`AC215`**. Then the voice agent starts; speak after the "Listening" line.
 
 SSO keys are temporary (8 hours). When they expire, re-run `aws sso login --profile careonex-team`.
 

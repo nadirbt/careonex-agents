@@ -24,3 +24,6 @@ __pycache__/
 .python-version
 .idea/
 .vscode/
+
+# Private team values (account id, portal URL, teammate e-mails)
+TEAM_SETUP.private.md
