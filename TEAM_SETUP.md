@@ -118,7 +118,7 @@ source .venv/bin/activate
 python -m pip install -r requirements.txt
 ```
 
-> SSO resolution in the app uses **botocore**, which is installed automatically with `awscli`. If you skipped `awscli`, run `pip install botocore` inside the venv.
+> SSO resolution in the app uses **botocore**, which is listed in `requirements.txt` and installed into the venv by `pip install -r requirements.txt` (Part C prereqs). Installing `awscli` via Homebrew does **not** provide this — Homebrew's AWS CLI v2 is a standalone binary with its own bundled Python, not a pip package, so it never reaches the venv. If `python -m nova_sonic` prints `Opening bidirectional stream...` and then just sits there, that's this exact problem: run `pip install botocore` into the venv.
 
 ### C1 — Configure the SSO profile (once)
 
