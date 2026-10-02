@@ -1,3 +1,9 @@
 pyaudio>=0.2.13
 aws_sdk_bedrock_runtime>=0.1.0,<0.2.0
 smithy-aws-core>=0.0.1
+# Needed to resolve IAM Identity Center (SSO) / assumed-role profiles in
+# nova_sonic/session.py._load_sso_credentials(). Installing the AWS CLI via
+# Homebrew (as in TEAM_SETUP.md Part C) does NOT provide this to the venv --
+# it only ships bundled inside the standalone CLI binary, not as a pip
+# package -- so it must be listed here explicitly.
+botocore>=1.34.0
