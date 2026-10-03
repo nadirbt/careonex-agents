@@ -30,3 +30,6 @@ TEAM_SETUP.private.md
 
 # Local Claude Code guidance (kept out of the repo)
 CLAUDE.md
+
+# Pipeline outputs (snapshot manifests, downloads). Anchored so services/data/ is NOT ignored.
+/data/
