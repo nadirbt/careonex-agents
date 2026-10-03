@@ -65,4 +65,7 @@ def bucket_name(spec: BucketSpec) -> str:
     override = os.environ.get(spec.env_var)
     if override:
         return override
-    return f"careonex-{spec.default_suffix}-{account_id()}"
+    # "ac215-" prefix on purpose: every production bucket in the shared account starts with
+    # "careonex-", and the AC215 IAM policy is scoped to arn:aws:s3:::ac215-*. Never change this
+    # to "careonex-" or the course role gains access to production data.
+    return f"ac215-{spec.default_suffix}-{account_id()}"

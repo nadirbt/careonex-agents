@@ -30,7 +30,7 @@ def test_sidecar_flags_estimated_dates():
 
 
 def test_ingest_from_local_dir_is_idempotent(aws, tmp_path):
-    bucket = "careonex-program-kb-test"
+    bucket = "ac215-program-kb-test"
     aws.create_bucket(Bucket=bucket)
     rows = load_catalog(CATALOG)
     local = tmp_path / "mirror"
@@ -51,7 +51,7 @@ def test_ingest_from_local_dir_is_idempotent(aws, tmp_path):
 
 
 def test_ingest_dry_run_uploads_nothing(aws, tmp_path):
-    bucket = "careonex-program-kb-test"
+    bucket = "ac215-program-kb-test"
     aws.create_bucket(Bucket=bucket)
     local = tmp_path / "mirror"
     for r in load_catalog(CATALOG):
