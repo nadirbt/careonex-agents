@@ -27,3 +27,6 @@ __pycache__/
 
 # Private team values (account id, portal URL, teammate e-mails)
 TEAM_SETUP.private.md
+
+# Local Claude Code guidance (kept out of the repo)
+CLAUDE.md
