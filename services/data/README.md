@@ -14,7 +14,7 @@ The first container in the pipeline. It does two things:
 
 | Key | Default name | Encryption | Purpose |
 | --- | --- | --- | --- |
-| `knowledge` | `careonex-program-kb-<account-id>` | SSE-S3 | Public program documents + sidecars. Source for the Knowledge Base. No PII. |
+| `knowledge` | `ac215-program-kb-<account-id>` | SSE-S3 | Public program documents + sidecars. Source for the Knowledge Base. No PII. |
 
 Override the name with `CAREONEX_KB_BUCKET` when a bucket already exists under another name.
 
@@ -61,35 +61,11 @@ uv run pytest -q
 
 ## Permissions
 
-The `AC215` permission set only allows Nova Sonic invocation, so teammates on it will get
-`AccessDenied` here (the CLI says so and exits 5). Bucket work needs a second permission set,
-`AC215-Data`, assigned to whoever runs this pipeline:
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "CareonexBuckets",
-      "Effect": "Allow",
-      "Action": [
-        "s3:CreateBucket", "s3:ListBucket", "s3:GetBucketLocation",
-        "s3:GetBucketVersioning", "s3:PutBucketVersioning",
-        "s3:GetEncryptionConfiguration", "s3:PutEncryptionConfiguration",
-        "s3:GetBucketPublicAccessBlock", "s3:PutBucketPublicAccessBlock",
-        "s3:GetBucketTagging", "s3:PutBucketTagging",
-        "s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:GetObjectVersion"
-      ],
-      "Resource": ["arn:aws:s3:::careonex-*", "arn:aws:s3:::careonex-*/*"]
-    },
-    { "Sid": "Identity", "Effect": "Allow", "Action": "sts:GetCallerIdentity", "Resource": "*" }
-  ]
-}
-```
-
-Do not widen `AC215` itself (see TEAM_SETUP.md). Create the new permission set, assign it to the
-data owners, and pick the `AC215-Data` role at `aws sso login` time. The Bedrock Knowledge Base
-service role (next container) gets its own read-only policy on the knowledge bucket.
+Everyone uses the single `AC215` permission set. It is scoped by resource prefix: course resources
+are named `ac215-*`, production resources are named `careonex-*`, and the policy never mentions
+`careonex-*`. The full policy and the one-time service role live in `TEAM_SETUP.md` (section
+"The AC215 inline policy"). If this container exits 5 with `AccessDenied`, the permission set has
+not been reprovisioned yet; no re-login is needed once it has.
 
 ## Exit codes
 

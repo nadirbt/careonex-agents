@@ -17,11 +17,11 @@ The app only needs permission to call one model, **Amazon Nova 2 Sonic**, in **u
 | Team account id | `<TEAM_ACCOUNT_ID>` |
 | Identity Center | Enabled **with AWS Organizations**, primary region `us-east-1` |
 | Access portal URL | `<PORTAL_URL>` |
-| Permission set | `AC215` (8-hour session, one inline policy, below) |
+| Permission sets | `AC215` (all members, 8-hour session, one inline policy, below); `AC215-Admin` (owner only, AdministratorAccess) |
 | Group | `AC215`, assigned to the team account with the `AC215` permission set |
 | Members | See the table below (username = e-mail; addresses held privately) |
 | MFA | Required on every sign-in; authenticator app and security key/Touch ID both allowed; device enrolment forced at first sign-in |
-| Model | `amazon.nova-2-sonic-v1:0` is **active and authorized** in us-east-1 (no model-access toggle left to flip) |
+| Models | `amazon.nova-2-sonic-v1:0` is **active and authorized** in us-east-1; `amazon.titan-embed-text-v2:0` is needed for the knowledge base (check Model access once) |
 | Budget | `AC215-Bedrock-Monthly`: **$30/month** on Amazon Bedrock, alerts to the owner at 50%, 80%, 100% actual and 100% forecast (created 2026-09-29). The account also has a $200/month all-services budget. |
 
 ### Members of `AC215`
@@ -37,7 +37,10 @@ Each user's Identity Center username is their e-mail address. This is the addres
 
 ### The `AC215` inline policy
 
-This is the entire set of permissions a teammate has. Two Bedrock actions on one model ARN in one region. No billing, no console resources, no other models.
+Widened on 2026-10-03 from "Nova Sonic only" to "Nova Sonic plus the course's own S3, S3 Vectors
+and Bedrock Knowledge Base resources". Scoping is by name prefix: everything the course creates is
+named `ac215-*`; every production resource is named `careonex-*` and never appears below. One
+permission set for all five members keeps the laptop setup to a single profile.
 
 ```json
 {
@@ -46,26 +49,99 @@ This is the entire set of permissions a teammate has. Two Bedrock actions on one
     {
       "Sid": "NovaSonicInvoke",
       "Effect": "Allow",
+      "Action": ["bedrock:InvokeModelWithBidirectionalStream", "bedrock:InvokeModel"],
+      "Resource": [
+        "arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-2-sonic-v1:0",
+        "arn:aws:bedrock:us-east-1::foundation-model/amazon.titan-embed-text-v2:0"
+      ]
+    },
+    {
+      "Sid": "CourseBuckets",
+      "Effect": "Allow",
       "Action": [
-        "bedrock:InvokeModelWithBidirectionalStream",
-        "bedrock:InvokeModel"
+        "s3:CreateBucket", "s3:ListBucket", "s3:GetBucketLocation",
+        "s3:GetBucketVersioning", "s3:PutBucketVersioning",
+        "s3:GetEncryptionConfiguration", "s3:PutEncryptionConfiguration",
+        "s3:GetBucketPublicAccessBlock", "s3:PutBucketPublicAccessBlock",
+        "s3:GetBucketTagging", "s3:PutBucketTagging",
+        "s3:GetObject", "s3:GetObjectVersion", "s3:PutObject", "s3:DeleteObject"
       ],
-      "Resource": "arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-2-sonic-v1:0"
+      "Resource": ["arn:aws:s3:::ac215-*", "arn:aws:s3:::ac215-*/*"]
+    },
+    {
+      "Sid": "CourseVectorBuckets",
+      "Effect": "Allow",
+      "Action": ["s3vectors:*"],
+      "Resource": "arn:aws:s3vectors:us-east-1:<TEAM_ACCOUNT_ID>:bucket/ac215-*"
+    },
+    {
+      "Sid": "CourseKnowledgeBases",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:CreateKnowledgeBase", "bedrock:GetKnowledgeBase", "bedrock:ListKnowledgeBases",
+        "bedrock:UpdateKnowledgeBase", "bedrock:DeleteKnowledgeBase",
+        "bedrock:CreateDataSource", "bedrock:GetDataSource", "bedrock:ListDataSources",
+        "bedrock:UpdateDataSource", "bedrock:DeleteDataSource",
+        "bedrock:StartIngestionJob", "bedrock:GetIngestionJob", "bedrock:ListIngestionJobs",
+        "bedrock:Retrieve", "bedrock:RetrieveAndGenerate",
+        "bedrock:TagResource", "bedrock:ListTagsForResource"
+      ],
+      "Resource": "arn:aws:bedrock:us-east-1:<TEAM_ACCOUNT_ID>:knowledge-base/*"
+    },
+    {
+      "Sid": "PassKnowledgeBaseRole",
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": "arn:aws:iam::<TEAM_ACCOUNT_ID>:role/AC215-KnowledgeBaseRole",
+      "Condition": {"StringEquals": {"iam:PassedToService": "bedrock.amazonaws.com"}}
+    },
+    {
+      "Sid": "Identity",
+      "Effect": "Allow",
+      "Action": "sts:GetCallerIdentity",
+      "Resource": "*"
     }
   ]
 }
 ```
 
+Still excluded on purpose: anything on `careonex-*`, IAM role creation, billing, and every Bedrock
+model other than Nova Sonic and the Titan embedding model.
+
+### The `AC215-KnowledgeBaseRole` service role (owner creates once)
+
+Bedrock assumes this role to read the course bucket and write the vector index. Teammates may pass
+it (above) but cannot create or edit it. Trust policy: principal `bedrock.amazonaws.com`, with
+`aws:SourceAccount` = `<TEAM_ACCOUNT_ID>`. Permissions:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {"Effect": "Allow", "Action": ["s3:ListBucket"], "Resource": "arn:aws:s3:::ac215-program-kb-<TEAM_ACCOUNT_ID>"},
+    {"Effect": "Allow", "Action": ["s3:GetObject"], "Resource": "arn:aws:s3:::ac215-program-kb-<TEAM_ACCOUNT_ID>/*"},
+    {"Effect": "Allow", "Action": ["s3vectors:*"], "Resource": "arn:aws:s3vectors:us-east-1:<TEAM_ACCOUNT_ID>:bucket/ac215-*"},
+    {"Effect": "Allow", "Action": ["bedrock:InvokeModel"], "Resource": "arn:aws:bedrock:us-east-1::foundation-model/amazon.titan-embed-text-v2:0"}
+  ]
+}
+```
+
+### The `AC215-Admin` permission set (owner only)
+
+AWS managed policy `AdministratorAccess`, assigned to the owner alone. This is the "stop using
+root" item: the owner signs in to the portal and picks `AC215-Admin` for account work and `AC215`
+to run the app like everyone else. Configure it as a second CLI profile, `careonex-admin`.
+
 ### Decisions made, and why
 
 - **Identity Center (SSO) only. No IAM users.** Temporary keys, MFA, one place to revoke. Long-lived keys on laptops are what the account's audit baseline exists to avoid.
-- **Identities live in the production account**, not a separate member account. Acceptable for a course team calling one model with synthetic audio, because the policy is a data-path dead end. The mitigations that make it a good choice: MFA Required (done), the $30/month Bedrock budget (done, see Cost), and **never widening `AC215` in place**. Move to a member account under the organization if the team grows, the agent starts handling real calls, or someone else needs admin rights.
+- **Identities live in the production account**, not a separate member account. Acceptable for a course team working on synthetic data, because the policy can only reach resources named `ac215-*` and the Nova/Titan models. The mitigations: MFA Required (done), the $30/month Bedrock budget (done, see Cost), and **the `ac215-` / `careonex-` naming split**, which is the real boundary now that the policy covers S3 and Bedrock Knowledge Bases (widened 2026-10-03; the earlier rule was to never widen it). Move to a member account under the organization if the team grows, the agent starts handling real calls, or someone other than the owner needs admin rights.
 - **Root is for setup only.** The owner should operate through an admin permission set from now on, never root.
 
 ### What teammates can see and do
 
 - **Can see:** one entry in the access portal (the account's name and id) with one role, `AC215`. From a terminal, `aws sts get-caller-identity` shows the account id and their own role name.
-- **Can do:** call Nova 2 Sonic in us-east-1. Every other Bedrock model is refused.
+- **Can do:** call Nova 2 Sonic, create and use `ac215-*` buckets, vector buckets and knowledge bases in us-east-1. Every `careonex-*` resource and every other Bedrock model is refused.
 
 ---
 
@@ -87,7 +163,7 @@ Everything here is in **IAM Identity Center** in the console, region `us-east-1`
 
 ### Change what the permission set allows
 
-**Permission sets → AC215 → Inline policy → Edit**, save, then click **Reprovision** in the yellow banner. Everyone in the group gets the new policy at their next sign-in. Prefer not to widen it; if the team needs more, that is the signal to create a member account instead.
+**Permission sets → AC215 → Inline policy → Edit**, save, then click **Reprovision** in the yellow banner. The policy is attached to the role itself, so existing sessions pick it up on their next API call; nobody has to sign in again or accept anything. Keep every new resource under the `ac215-` prefix so the policy never has to mention a production name.
 
 ---
 
