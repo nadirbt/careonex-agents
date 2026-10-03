@@ -1,0 +1,29 @@
+[project]
+name = "careonex-data"
+version = "0.1.0"
+description = "CareOneX data service: S3 bucket provisioning and knowledge-corpus ingestion"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "boto3>=1.35",
+    "requests>=2.32",
+]
+
+[project.scripts]
+careonex-data = "careonex_data.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "moto[s3,sts]>=5",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["careonex_data"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

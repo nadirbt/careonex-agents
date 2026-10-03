@@ -1,0 +1,103 @@
+# services/data — buckets and knowledge-corpus ingestion
+
+The first container in the pipeline. It does two things:
+
+1. **Ensures the S3 buckets exist** (idempotent). Missing buckets are created with versioning,
+   full public-access block, default encryption and project tags. Existing buckets are left exactly
+   as they are and simply become accessible to the rest of the pipeline.
+2. **Ingests the approved source catalog** (`catalog/ragfile_list.csv`, mirrored from the team's
+   Drive folder "RAG Knowledge Base") into the knowledge bucket, one object per source plus a
+   `.metadata.json` sidecar in the format Amazon Bedrock Knowledge Bases uses for metadata filtering.
+   Every run writes a snapshot manifest, which is the dataset version id.
+
+## Buckets
+
+| Key | Default name | Encryption | Purpose |
+| --- | --- | --- | --- |
+| `knowledge` | `careonex-program-kb-<account-id>` | SSE-S3 | Public program documents + sidecars. Source for the Knowledge Base. No PII. |
+
+Override the name with `CAREONEX_KB_BUCKET` when a bucket already exists under another name.
+
+There is deliberately no bucket for client-supplied documents. If the product ever stores PHI, it
+gets its own KMS-encrypted bucket in a separate account and is never a Knowledge Base data source.
+
+Object layout in the knowledge bucket:
+
+```
+raw/<source_id>/<file_name>                  the document (object metadata carries sha256, source_url, fetch_date)
+raw/<source_id>/<file_name>.metadata.json    {"metadataAttributes": {program, year, jurisdiction, county, effective_date, ...}}
+snapshots/<snapshot_id>/manifest.json        which objects (and versions) make up this dataset snapshot
+```
+
+Later pipeline steps add, in the same bucket and never touching `raw/`:
+
+```
+text/<source_id>/<file_name>.md              clean Markdown (services/extract)
+chunks/<source_id>/<file_name>.jsonl         section-aware chunks (services/chunk); the Knowledge Base data source
+```
+
+## Run it
+
+From the repo root, after `aws sso login --profile careonex-team` on the host:
+
+```bash
+make build            # docker compose build
+make whoami           # prints the identity the container is using
+make run              # ensure-buckets, then ingest  (== docker compose up data ingest)
+make status           # bucket existence + settings
+docker compose run --rm data ls raw/nj_doas/
+docker compose run --rm data ingest --dry-run        # fetch + hash, upload nothing
+docker compose run --rm data ingest --only nj_dmahs  # one publisher
+```
+
+Without Docker (development):
+
+```bash
+cd services/data
+uv sync
+uv run careonex-data status
+uv run pytest -q
+```
+
+## Permissions
+
+The `AC215` permission set only allows Nova Sonic invocation, so teammates on it will get
+`AccessDenied` here (the CLI says so and exits 5). Bucket work needs a second permission set,
+`AC215-Data`, assigned to whoever runs this pipeline:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CareonexBuckets",
+      "Effect": "Allow",
+      "Action": [
+        "s3:CreateBucket", "s3:ListBucket", "s3:GetBucketLocation",
+        "s3:GetBucketVersioning", "s3:PutBucketVersioning",
+        "s3:GetEncryptionConfiguration", "s3:PutEncryptionConfiguration",
+        "s3:GetBucketPublicAccessBlock", "s3:PutBucketPublicAccessBlock",
+        "s3:GetBucketTagging", "s3:PutBucketTagging",
+        "s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:GetObjectVersion"
+      ],
+      "Resource": ["arn:aws:s3:::careonex-*", "arn:aws:s3:::careonex-*/*"]
+    },
+    { "Sid": "Identity", "Effect": "Allow", "Action": "sts:GetCallerIdentity", "Resource": "*" }
+  ]
+}
+```
+
+Do not widen `AC215` itself (see TEAM_SETUP.md). Create the new permission set, assign it to the
+data owners, and pick the `AC215-Data` role at `aws sso login` time. The Bedrock Knowledge Base
+service role (next container) gets its own read-only policy on the knowledge bucket.
+
+## Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| 0 | success |
+| 1 | ingest finished but at least one source failed (see manifest) |
+| 2 | knowledge bucket not available; run `ensure-buckets` |
+| 3 | no AWS credentials (SSO login expired or ~/.aws not mounted) |
+| 4 | bucket name exists but belongs to someone else |
+| 5 | AccessDenied: current role lacks S3 permissions |
