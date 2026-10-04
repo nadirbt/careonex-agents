@@ -1,0 +1,48 @@
+import asyncio
+import json
+
+from nova_sonic import events
+from nova_sonic.tools import LOOKUP_PROGRAM_INFO, handle_tool, lookup_program_info_sync
+
+
+def test_prompt_start_carries_tool_configuration():
+    payload = json.loads(events.prompt_start("p", [LOOKUP_PROGRAM_INFO]))["event"]["promptStart"]
+    assert payload["toolUseOutputConfiguration"] == {"mediaType": "application/json"}
+    spec = payload["toolConfiguration"]["tools"][0]["toolSpec"]
+    assert spec["name"] == "lookup_program_info"
+    schema = json.loads(spec["inputSchema"]["json"])
+    assert schema["required"] == ["query"]
+    assert "toolConfiguration" not in json.loads(events.prompt_start("p"))["event"]["promptStart"]
+
+
+def test_tool_result_events_sequence():
+    seq = [json.loads(e)["event"] for e in events.tool_result_events("p", "c", "tu-1", '{"passages": []}')]
+    assert list(seq[0]) == ["contentStart"] and seq[0]["contentStart"]["type"] == "TOOL" and seq[0]["contentStart"]["role"] == "TOOL"
+    assert seq[0]["contentStart"]["toolResultInputConfiguration"]["toolUseId"] == "tu-1"
+    assert seq[1]["toolResult"]["content"] == '{"passages": []}'
+    assert list(seq[2]) == ["contentEnd"]
+
+
+def test_lookup_without_retrieve_url_degrades_gracefully(monkeypatch):
+    import nova_sonic.tools as t
+
+    monkeypatch.setattr(t, "RETRIEVE_URL", "")
+    out = lookup_program_info_sync({"query": "JACC income limit"})
+    assert out["passages"] == [] and "follow up" in out["guidance"]
+    assert json.loads(asyncio.run(handle_tool("lookup_program_info", '{"query": "x"}')))["error"]
+
+
+def test_lookup_calls_retrieve_and_trims(monkeypatch):
+    import nova_sonic.tools as t
+
+    monkeypatch.setattr(t, "RETRIEVE_URL", "http://retrieve:8080")
+    seen = {}
+
+    def fake_post(url, payload, timeout):
+        seen["url"], seen["payload"] = url, payload
+        return {"latency_ms": 123, "passages": [{"text": "x" * 5000, "title": "JACC", "source_url": "https://nj.gov/jacc", "program": "JACC", "effective_date": "2026-03-12"}]}
+
+    monkeypatch.setattr(t, "_post_json", fake_post)
+    out = lookup_program_info_sync({"query": "JACC income limit", "program": "JACC"})
+    assert seen["url"] == "http://retrieve:8080/retrieve" and seen["payload"]["program"] == "JACC"
+    assert len(out["passages"][0]["text"]) == 1200 and out["passages"][0]["source"] == "JACC" and out["latency_ms"] == 123
