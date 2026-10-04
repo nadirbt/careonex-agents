@@ -146,7 +146,7 @@ def extract_all(
                         "derived_from": raw_key,
                         "source_sha256": item.raw_sha256,
                         "text_sha256": item.text_sha256,
-                        "extractor": "pymupdf4llm" if attrs.get("kind") == "pdf" else "markdownify",
+                        "extractor": {"pdf": "pymupdf4llm", "md": "passthrough"}.get(attrs.get("kind"), "markdownify"),
                         "extractor_version": EXTRACTOR_VERSION,
                         "chars": item.chars,
                     }

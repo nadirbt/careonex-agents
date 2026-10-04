@@ -96,4 +96,6 @@ def to_markdown(data: bytes, kind: str, file_name: str = "", url: str | None = N
         return pdf_to_markdown(data)
     if k in ("html", "htm"):
         return html_to_markdown(data, url=url)
+    if k in ("md", "markdown"):
+        return normalise(data.decode("utf-8", errors="replace"))  # curated sources are already Markdown
     raise ValueError(f"unsupported document kind {kind!r} for {file_name}")

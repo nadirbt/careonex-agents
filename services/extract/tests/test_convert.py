@@ -103,3 +103,10 @@ def test_va_gov_wrapper_with_sidebar_hint_keeps_article():
     assert "monthly payments added" in md
     assert "Survivors pension" not in md
     assert "Aid and Attendance (PDF)." in md and "va.gov/files" not in md
+
+
+def test_markdown_passes_through_normalised():
+    from careonex_extract.convert import to_markdown
+
+    md = to_markdown(b"# Limits 2026\r\n\r\n\r\n- JACC: $4,855  \n", "md", "x.md")
+    assert md == "# Limits 2026\n\n- JACC: $4,855\n"
