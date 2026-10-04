@@ -31,5 +31,13 @@ DEFAULT_SYSTEM_PROMPT = (
 RETRIEVE_URL = os.environ.get("CAREONEX_RETRIEVE_URL", "").rstrip("/")
 RETRIEVE_TIMEOUT_S = float(os.environ.get("CAREONEX_RETRIEVE_TIMEOUT_S", "4"))
 
+# Echo handling for laptop speakers. While the assistant is playing, mic chunks are forwarded only
+# if their RMS level exceeds ECHO_GATE_RMS (int16 scale, 0 disables the gate). Speech into the mic is
+# usually several times louder than speaker bleed. HALF_DUPLEX mutes the mic entirely during playback
+# (no barge-in). Headphones make both unnecessary.
+ECHO_GATE_RMS = int(os.environ.get("NOVA_SONIC_ECHO_GATE", "1500"))
+HALF_DUPLEX = os.environ.get("NOVA_SONIC_HALF_DUPLEX", "").lower() in ("1", "true", "yes")
+PLAYBACK_TAIL_S = 0.35  # treat the mic as "during playback" for this long after the last speaker write
+
 # Server-side barge-in is signaled as this exact text payload.
 INTERRUPTED_MARKER = '{ "interrupted" : true }'

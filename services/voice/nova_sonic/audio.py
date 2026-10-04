@@ -2,15 +2,44 @@
 
 from __future__ import annotations
 
+import array
 import asyncio
+import math
+import time
 from typing import Any, Optional
 
 from nova_sonic.config import (
     CHANNELS,
     CHUNK_FRAMES,
+    ECHO_GATE_RMS,
+    HALF_DUPLEX,
     INPUT_SAMPLE_RATE,
     OUTPUT_SAMPLE_RATE,
+    PLAYBACK_TAIL_S,
 )
+
+
+def rms_int16(data: bytes) -> float:
+    """Root-mean-square level of 16-bit little-endian PCM, 0..32767."""
+    if len(data) < 2:
+        return 0.0
+    samples = array.array("h")
+    samples.frombytes(data[: len(data) - (len(data) % 2)])
+    if not samples:
+        return 0.0
+    return math.sqrt(sum(s * s for s in samples) / len(samples))
+
+
+def should_forward(data: bytes, playing: bool, gate_rms: int = ECHO_GATE_RMS, half_duplex: bool = HALF_DUPLEX) -> bool:
+    """Decide whether a mic chunk goes to Nova. Everything passes when the assistant is silent;
+    during playback, half-duplex drops all audio and the gate drops anything quieter than gate_rms."""
+    if not playing:
+        return True
+    if half_duplex:
+        return False
+    if gate_rms <= 0:
+        return True
+    return rms_int16(data) >= gate_rms
 from nova_sonic.session import NovaSonicSession
 
 
@@ -44,10 +73,19 @@ class DuplexAudio:
             frames_per_buffer=CHUNK_FRAMES,
         )
         self._playback_task: asyncio.Task[None] | None = None
+        self._last_write = 0.0  # monotonic time of the last speaker write
+        self.gated_chunks = 0
+
+    @property
+    def playing(self) -> bool:
+        return (time.monotonic() - self._last_write) < PLAYBACK_TAIL_S
 
     def _on_mic(self, in_data, frame_count, time_info, status):
         if self.running and in_data:
-            asyncio.run_coroutine_threadsafe(self.session.send_audio(in_data), self._loop)
+            if should_forward(in_data, self.playing):
+                asyncio.run_coroutine_threadsafe(self.session.send_audio(in_data), self._loop)
+            else:
+                self.gated_chunks += 1
         return (None, self._pyaudio_mod.paContinue)
 
     async def _play(self) -> None:
@@ -68,11 +106,17 @@ class DuplexAudio:
                 if not self.running or self.session.barge_in:
                     break
                 piece = audio[offset : offset + write_chunk]
+                self._last_write = time.monotonic()
                 await asyncio.get_event_loop().run_in_executor(None, self._output.write, piece)
+                self._last_write = time.monotonic()
                 await asyncio.sleep(0)
 
     async def start(self) -> None:
         print("Listening. Speak anytime — you can interrupt the assistant.")
+        if HALF_DUPLEX:
+            print("Half-duplex: the mic is muted while the assistant speaks (NOVA_SONIC_HALF_DUPLEX=1).")
+        elif ECHO_GATE_RMS > 0:
+            print(f"Echo gate: while the assistant speaks, only mic audio louder than RMS {ECHO_GATE_RMS} is sent (NOVA_SONIC_ECHO_GATE). Headphones avoid echo entirely.")
         print("Press Enter to end the session.")
         await self.session.start_audio()
         self.running = True
