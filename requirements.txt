@@ -1,6 +1,0 @@
-pyaudio>=0.2.13
-aws_sdk_bedrock_runtime>=0.1.0,<0.2.0
-smithy-aws-core>=0.0.1
-# Resolves SSO / assumed-role profiles (aws configure sso) in nova_sonic/session.py.
-# The Homebrew awscli bundles its own interpreter, so it does not provide this to the venv.
-botocore>=1.34

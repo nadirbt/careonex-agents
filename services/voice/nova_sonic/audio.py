@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Optional
-
-import pyaudio
+from typing import Any, Optional
 
 from nova_sonic.config import (
     CHANNELS,
@@ -18,10 +16,18 @@ from nova_sonic.session import NovaSonicSession
 
 class DuplexAudio:
     def __init__(self, session: NovaSonicSession) -> None:
+        try:
+            import pyaudio  # noqa: PLC0415 - optional dependency, only the interactive mic client needs it
+        except ImportError as exc:  # pragma: no cover
+            raise SystemExit(
+                "PyAudio is not installed. For the microphone client run `brew install portaudio` then "
+                "`uv sync --extra mic` in services/voice. The container only runs the mic-free smoke test."
+            ) from exc
+        self._pyaudio_mod: Any = pyaudio
         self.session = session
         self.running = False
         self._loop = asyncio.get_running_loop()
-        self._pyaudio: Optional[pyaudio.PyAudio] = pyaudio.PyAudio()
+        self._pyaudio: Optional[Any] = pyaudio.PyAudio()
         self._input = self._pyaudio.open(
             format=pyaudio.paInt16,
             channels=CHANNELS,
@@ -42,7 +48,7 @@ class DuplexAudio:
     def _on_mic(self, in_data, frame_count, time_info, status):
         if self.running and in_data:
             asyncio.run_coroutine_threadsafe(self.session.send_audio(in_data), self._loop)
-        return (None, pyaudio.paContinue)
+        return (None, self._pyaudio_mod.paContinue)
 
     async def _play(self) -> None:
         write_chunk = CHUNK_FRAMES * CHANNELS * 2
