@@ -34,12 +34,56 @@ class RetrievalResult:
         return {**asdict(self), "passages": [asdict(p) for p in self.passages]}
 
 
+# Exact `program` labels as they appear in the catalog sidecars. S3 Vectors supports only exact-match
+# filters (equals / in), so caller-friendly names are mapped to these labels.
+PROGRAM_LABELS: dict[str, list[str]] = {
+    "mltss": ["NJ FamilyCare / Medicaid MLTSS", "All DoAS programs"],
+    "medicaid": ["NJ FamilyCare / Medicaid MLTSS", "All DoAS programs"],
+    "nj familycare": ["NJ FamilyCare / Medicaid MLTSS", "All DoAS programs"],
+    "familycare": ["NJ FamilyCare / Medicaid MLTSS", "All DoAS programs"],
+    "pca": ["NJ FamilyCare / Medicaid MLTSS", "All DoAS programs"],
+    "jacc": ["JACC", "All DoAS programs"],
+    "pace": ["PACE", "All DoAS programs"],
+    "respite": ["Statewide Respite Care Program", "All DoAS programs"],
+    "srcp": ["Statewide Respite Care Program", "All DoAS programs"],
+    "alzheimer": ["Alzheimer's Adult Day Services Program", "All DoAS programs"],
+    "aadsp": ["Alzheimer's Adult Day Services Program", "All DoAS programs"],
+    "adult day": ["Alzheimer's Adult Day Services Program", "All DoAS programs"],
+    "adrc": ["County Offices on Aging / ADRC", "All DoAS programs"],
+    "county": ["County Offices on Aging / ADRC", "All DoAS programs"],
+    "medicare": ["Medicare home health benefit"],
+    "va": ["VA Homemaker and Home Health Aide Care", "VA Home and Community Based Services", "VA Aid and Attendance / Housebound"],
+    "veteran": ["VA Homemaker and Home Health Aide Care", "VA Home and Community Based Services", "VA Aid and Attendance / Housebound"],
+}
+
+
+def program_labels(program: str | None) -> list[str]:
+    """Map a caller-supplied program name to exact catalog labels. Unknown names return [] (no filter),
+    so semantic search still runs rather than filtering everything out."""
+    if not program:
+        return []
+    key = program.strip().lower()
+    for alias, labels in PROGRAM_LABELS.items():  # aliases first: "JACC" also pulls in the DoAS program guide
+        if alias in key:
+            return labels
+    exact = {lbl for labels in PROGRAM_LABELS.values() for lbl in labels}
+    if program.strip() in exact:
+        return [program.strip()]
+    return []
+
+
+def _equals_any(key: str, values: list) -> dict:
+    if len(values) == 1:
+        return {"equals": {"key": key, "value": values[0]}}
+    return {"orAll": [{"equals": {"key": key, "value": v}} for v in values]}
+
+
 def build_filter(program: str | None = None, year: int | None = None, jurisdiction: str | None = None, source_id: str | None = None) -> dict | None:
-    """Bedrock KB filter syntax: {"equals": {"key":..., "value":...}} combined with {"andAll": [...]}.
-    `program` uses stringContains so "MLTSS" matches "NJ FamilyCare / Medicaid MLTSS"."""
+    """Bedrock KB filter syntax, restricted to what S3 Vectors supports: equals, combined with andAll/orAll."""
     clauses: list[dict] = []
-    if program:
-        clauses.append({"stringContains": {"key": "program", "value": program}})
+    labels = program_labels(program)
+    if labels:
+        clauses.append(_equals_any("program", labels))
     if year is not None:
         clauses.append({"equals": {"key": "year", "value": year}})
     if jurisdiction:

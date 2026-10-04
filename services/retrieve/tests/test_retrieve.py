@@ -23,9 +23,13 @@ HIT = {
 
 def test_filter_building():
     assert build_filter() is None
-    assert build_filter(program="MLTSS") == {"stringContains": {"key": "program", "value": "MLTSS"}}
+    f = build_filter(program="MLTSS")
+    assert f["orAll"][0] == {"equals": {"key": "program", "value": "NJ FamilyCare / Medicaid MLTSS"}}
     f = build_filter(program="JACC", year=2026)
+    assert f["andAll"][0]["orAll"][0] == {"equals": {"key": "program", "value": "JACC"}}
     assert f["andAll"][1] == {"equals": {"key": "year", "value": 2026}}
+    assert build_filter(program="something unknown") is None  # unknown name: no filter, not zero results
+    assert build_filter(program="Medicare") == {"equals": {"key": "program", "value": "Medicare home health benefit"}}
 
 
 def test_retrieve_maps_passages_and_measures_latency():
@@ -34,7 +38,7 @@ def test_retrieve_maps_passages_and_measures_latency():
         stub.add_response("retrieve", {"retrievalResults": [HIT]}, {
             "knowledgeBaseId": "KBTEST1234",
             "retrievalQuery": {"text": "What is the JACC income limit?"},
-            "retrievalConfiguration": {"vectorSearchConfiguration": {"numberOfResults": 3, "filter": {"stringContains": {"key": "program", "value": "JACC"}}}},
+            "retrievalConfiguration": {"vectorSearchConfiguration": {"numberOfResults": 3, "filter": {"orAll": [{"equals": {"key": "program", "value": "JACC"}}, {"equals": {"key": "program", "value": "All DoAS programs"}}]}}},
         })
         r = retrieve(rt, "KBTEST1234", "What is the JACC income limit?", 3, build_filter(program="JACC"))
     assert len(r.passages) == 1
@@ -49,7 +53,7 @@ def test_http_api(monkeypatch):
     stub.add_response("retrieve", {"retrievalResults": [HIT]}, {
         "knowledgeBaseId": "KBTEST1234",
         "retrievalQuery": {"text": "Does JACC have an income limit?"},
-        "retrievalConfiguration": {"vectorSearchConfiguration": {"numberOfResults": 5, "filter": {"stringContains": {"key": "program", "value": "JACC"}}}},
+        "retrievalConfiguration": {"vectorSearchConfiguration": {"numberOfResults": 5, "filter": {"orAll": [{"equals": {"key": "program", "value": "JACC"}}, {"equals": {"key": "program", "value": "All DoAS programs"}}]}}},
     })
     stub.activate()
     monkeypatch.setattr(appmod, "_runtime", rt)
