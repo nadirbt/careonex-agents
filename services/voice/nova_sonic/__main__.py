@@ -34,7 +34,10 @@ def main() -> None:
             "or configure ~/.aws/credentials and optionally AWS_PROFILE."
         )
         raise SystemExit(1)
-    asyncio.run(run())
+    try:
+        asyncio.run(run())
+    except KeyboardInterrupt:
+        print("\nStopped.")
 
 
 if __name__ == "__main__":

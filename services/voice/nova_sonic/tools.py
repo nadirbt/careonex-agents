@@ -13,7 +13,7 @@ import urllib.error
 import urllib.request
 from typing import Any
 
-from nova_sonic.config import RETRIEVE_TIMEOUT_S, RETRIEVE_URL
+from nova_sonic.config import INTAKE_DIR, RETRIEVE_TIMEOUT_S, RETRIEVE_URL
 
 log = logging.getLogger(__name__)
 
@@ -42,7 +42,58 @@ LOOKUP_PROGRAM_INFO = {
     }
 }
 
-TOOLS: list[dict] = [LOOKUP_PROGRAM_INFO]
+INTAKE_FIELDS = {
+    "caller_name": "Caller's name.",
+    "relationship": "Caller's relationship to the person who needs care (self, daughter, son, spouse, friend...).",
+    "care_recipient_age": "Age of the person who needs care, if given.",
+    "county": "New Jersey county where care is needed.",
+    "kind_of_help": "What help is needed: personal care (bathing, dressing), companionship, housekeeping, medication reminders, dementia care, live-in...",
+    "hours_per_week": "Rough hours of care per week, or 'live-in'.",
+    "timeline": "When care should start: now, within a month, planning ahead.",
+    "payer": "How they expect to pay: Medicaid/MLTSS, Medicare, VA, long-term care insurance, private pay, not sure.",
+    "callback_phone": "Best phone number to call back.",
+    "language": "Preferred language for the callback (English, Spanish...).",
+    "notes": "Anything else important the caller said, in one or two sentences.",
+}
+
+SAVE_INTAKE = {
+    "toolSpec": {
+        "name": "save_intake",
+        "description": (
+            "Save the family's details so a CareOneX coordinator can call back and arrange home care. Call it once, "
+            "after reading the key details back to the caller. Missing fields may be left out."
+        ),
+        "inputSchema": {
+            "json": json.dumps(
+                {
+                    "type": "object",
+                    "properties": {k: {"type": "string", "description": v} for k, v in INTAKE_FIELDS.items()},
+                    "required": ["callback_phone"],
+                }
+            )
+        },
+    }
+}
+
+TOOLS: list[dict] = [LOOKUP_PROGRAM_INFO, SAVE_INTAKE]
+
+
+def save_intake_sync(args: dict[str, Any]) -> dict:
+    import datetime as dt
+    import pathlib
+    import uuid
+
+    record = {k: str(args.get(k, "")).strip() for k in INTAKE_FIELDS if args.get(k)}
+    if not record.get("callback_phone"):
+        return {"saved": False, "error": "callback_phone missing", "guidance": "Ask for the best phone number to call back, then save again."}
+    record.update({"intake_id": uuid.uuid4().hex[:12], "created_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"), "channel": "voice", "status": "new"})
+    out_dir = pathlib.Path(INTAKE_DIR)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    path = out_dir / f"{record['created_at'].replace(':', '')}-{record['intake_id']}.json"
+    path.write_text(json.dumps(record, indent=2, ensure_ascii=False))
+    log.info("intake saved: %s", path)
+    print(f"Intake saved: {path}")
+    return {"saved": True, "intake_id": record["intake_id"], "guidance": "Tell the caller a CareOneX coordinator will call them back within one business day, and thank them."}
 
 
 def _post_json(url: str, payload: dict, timeout: float) -> dict:
@@ -104,6 +155,8 @@ async def handle_tool(name: str, args_json: str) -> str:
         args = {"query": args_json}
     if name == "lookup_program_info":
         result = await asyncio.get_running_loop().run_in_executor(None, lookup_program_info_sync, args)
+    elif name == "save_intake":
+        result = await asyncio.get_running_loop().run_in_executor(None, save_intake_sync, args)
     else:
         result = {"error": f"unknown tool {name}"}
     return json.dumps(result, ensure_ascii=False)

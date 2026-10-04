@@ -60,3 +60,33 @@ def test_passages_sorted_newest_first_and_titles_speakable(monkeypatch):
     out = lookup_program_info_sync({"query": "JACC income limit"})
     assert [p["text"] for p in out["passages"]] == ["new", "old"]
     assert out["passages"][1]["document"] == "2026 Program Guide"
+
+
+def test_save_intake_writes_a_record(tmp_path, monkeypatch):
+    import nova_sonic.tools as t
+
+    monkeypatch.setattr(t, "INTAKE_DIR", str(tmp_path / "intakes"))
+    out = json.loads(asyncio.run(handle_tool("save_intake", json.dumps({
+        "caller_name": "Katherine", "relationship": "daughter", "care_recipient_age": "77", "county": "Hudson",
+        "kind_of_help": "bathing, meals, companionship", "hours_per_week": "20", "timeline": "now",
+        "payer": "not sure", "callback_phone": "201-555-0100", "language": "Spanish"}))))
+    assert out["saved"] is True and "coordinator" in out["guidance"]
+    files = list((tmp_path / "intakes").glob("*.json"))
+    assert len(files) == 1
+    rec = json.loads(files[0].read_text())
+    assert rec["county"] == "Hudson" and rec["language"] == "Spanish" and rec["status"] == "new" and rec["channel"] == "voice"
+
+
+def test_save_intake_requires_callback_phone(tmp_path, monkeypatch):
+    import nova_sonic.tools as t
+
+    monkeypatch.setattr(t, "INTAKE_DIR", str(tmp_path / "intakes"))
+    out = json.loads(asyncio.run(handle_tool("save_intake", json.dumps({"caller_name": "K"}))))
+    assert out["saved"] is False and not (tmp_path / "intakes").exists()
+
+
+def test_prompt_start_lists_both_tools():
+    from nova_sonic.tools import TOOLS
+
+    names = [t["toolSpec"]["name"] for t in json.loads(events.prompt_start("p", TOOLS))["event"]["promptStart"]["toolConfiguration"]["tools"]]
+    assert names == ["lookup_program_info", "save_intake"]

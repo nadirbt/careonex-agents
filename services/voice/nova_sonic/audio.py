@@ -68,12 +68,18 @@ class EchoGate:
             self.forwarded_during_playback += 1
             return True
         level = rms_int16(data)
+        if self.floor == 0.0:
+            # First chunk of this playback: calibrate the echo floor, never forward. A genuine
+            # interruption in the first ~32 ms of a reply is vanishingly rare.
+            self.floor = max(level, 1.0)
+            self.dropped += 1
+            return False
         if level > self.threshold:
             self._hold = self.hold_chunks
             self.forwarded_during_playback += 1
             return True
-        # Treat as echo: learn the floor from it (fast attack on first sample, then smooth).
-        self.floor = level if self.floor == 0.0 else (1 - self.alpha) * self.floor + self.alpha * level
+        # Treat as echo: keep learning the floor from it.
+        self.floor = (1 - self.alpha) * self.floor + self.alpha * level
         self.dropped += 1
         return False
 
