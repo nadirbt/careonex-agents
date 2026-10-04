@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.*\S)\s*$")
 TABLE_ROW_RE = re.compile(r"^\s*\|.*\|\s*$")
-CHUNKER_VERSION = "1"
+CHUNKER_VERSION = "2"  # 2: slim sidecars (<1024 bytes, Bedrock metadata limit)
 
 
 @dataclass

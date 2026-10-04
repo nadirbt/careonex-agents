@@ -20,4 +20,8 @@ docker compose run --rm chunk run --only nj_doas_program_guide --force
 uv run careonex-chunk preview some.md          # see the pieces locally
 ```
 
+Chunk sidecars are deliberately small (< 1024 bytes). Bedrock Knowledge Bases ignores any document whose
+`.metadata.json` is larger than 1 KB and still reports the ingestion job as COMPLETE; the only trace is in
+`failureReasons`. Hashes and provenance stay in S3 object metadata and in the `text/` sidecar.
+
 Bump `CHUNKER_VERSION` when the rules change so every document is re-chunked once.

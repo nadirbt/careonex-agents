@@ -81,20 +81,40 @@ def list_existing(s3, bucket: str, prefix: str) -> dict[str, dict]:
     return out
 
 
+# Bedrock Knowledge Bases silently ignores a document whose .metadata.json is larger than 1024 bytes
+# (the ingestion job still reports COMPLETE, with the reason only in failureReasons). Chunk sidecars
+# therefore carry only what retrieval filters on and what a citation needs; hashes and provenance stay
+# in the S3 object metadata and in the text/ sidecar.
+SIDECAR_LIMIT_BYTES = 1024
+_SIDECAR_BUDGET_BYTES = 900
+
+
 def sidecar_for(chunk: Chunk, doc_attrs: dict, text_key: str, total: int) -> dict:
-    attrs = dict(doc_attrs)
-    attrs.update(
-        {
-            "derived_from": text_key,
-            "chunk_id": chunk.chunk_id,
-            "chunk_order": chunk.order,
-            "chunk_count": total,
-            "heading_path": " > ".join(chunk.heading_path),
-            "chunk_sha256": chunk.sha256,
-            "chunker_version": CHUNKER_VERSION,
-            "chars": chunk.chars,
-        }
-    )
+    def pick(key: str, limit: int | None = None):
+        v = doc_attrs.get(key)
+        if isinstance(v, str) and limit:
+            v = v[:limit]
+        return v
+
+    attrs = {
+        "source_id": pick("source_id"),
+        "program": pick("program"),
+        "title": pick("title", 80),
+        "source_url": pick("source_url", 160),
+        "effective_date": pick("effective_date"),
+        "year": pick("year"),
+        "jurisdiction": pick("jurisdiction"),
+        "kind": pick("kind"),
+        "heading_path": " > ".join(chunk.heading_path)[:140],
+        "chunk_order": chunk.order,
+        "chunk_count": total,
+        "derived_from": text_key,
+    }
+    attrs = {k: v for k, v in attrs.items() if v not in (None, "")}
+    # Enforce the budget by trimming the two free-text fields first.
+    for field_name in ("heading_path", "title", "source_url"):
+        while len(json.dumps({"metadataAttributes": attrs}, ensure_ascii=False).encode("utf-8")) > _SIDECAR_BUDGET_BYTES and len(attrs.get(field_name, "")) > 20:
+            attrs[field_name] = attrs[field_name][: max(20, len(attrs[field_name]) // 2)]
     return {"metadataAttributes": attrs}
 
 
@@ -150,7 +170,8 @@ def chunk_all(
                 res.status = "dry-run"
             else:
                 for key, c in wanted.items():
-                    if existing.get(key, {}).get("chunk_sha256") == c.sha256 and existing[key].get("text_sha256") == text_sha:
+                    prev = existing.get(key, {})
+                    if prev.get("chunk_sha256") == c.sha256 and prev.get("text_sha256") == text_sha and prev.get("chunker_version") == CHUNKER_VERSION:
                         continue
                     s3.put_object(
                         Bucket=bucket, Key=key, Body=c.text.encode("utf-8"), ContentType="text/markdown; charset=utf-8",
@@ -158,7 +179,7 @@ def chunk_all(
                     )
                     s3.put_object(
                         Bucket=bucket, Key=key + SIDECAR_SUFFIX, ContentType="application/json",
-                        Body=json.dumps(sidecar_for(c, doc_attrs, text_key, len(chunks)), indent=2, ensure_ascii=False).encode("utf-8"),
+                        Body=json.dumps(sidecar_for(c, doc_attrs, text_key, len(chunks)), ensure_ascii=False).encode("utf-8"),
                     )
                     res.written += 1
                 stale = [k for k in existing if k not in wanted]
