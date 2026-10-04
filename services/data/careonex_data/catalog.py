@@ -17,7 +17,7 @@ from pathlib import Path
 
 from careonex_data.config import RAW_PREFIX
 
-JURISDICTION_BY_SOURCE = {"nj_dmahs": "NJ", "nj_doas": "NJ", "medicare_cms": "US", "va": "US"}
+JURISDICTION_BY_SOURCE = {"nj_dmahs": "NJ", "nj_doas": "NJ", "nj_dds": "NJ", "careonex_curated": "NJ", "medicare_cms": "US", "va": "US"}
 
 
 @dataclass(frozen=True)
@@ -67,7 +67,7 @@ class SourceRow:
     @property
     def content_type(self) -> str:
         guessed, _ = mimetypes.guess_type(self.file_name)
-        return guessed or {"pdf": "application/pdf", "html": "text/html"}.get(self.kind, "application/octet-stream")
+        return guessed or {"pdf": "application/pdf", "html": "text/html", "md": "text/markdown; charset=utf-8"}.get(self.kind, "application/octet-stream")
 
 
 def load_catalog(path: str | Path) -> list[SourceRow]:

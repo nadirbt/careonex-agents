@@ -62,7 +62,19 @@ def default_snapshot_id(catalog_path: str | Path) -> str:
     return f"{dt.date.today().isoformat()}-{catalog_sha256(catalog_path)[:8]}"
 
 
+CURATED_PREFIX = "curated/"
+
+
 def fetch_bytes(row: SourceRow, local_dir: Path | None, timeout: float) -> bytes:
+    # Curated sources are Markdown files maintained in this repo next to the catalog (team-reviewed
+    # summaries of official tables, each citing its primary source). They ship inside the image.
+    if row.source_url.startswith(CURATED_PREFIX):
+        from careonex_data.config import CATALOG_PATH
+
+        candidate = Path(CATALOG_PATH).parent / row.source_url
+        if not candidate.is_file():
+            raise FileNotFoundError(f"curated source missing from catalog dir: {candidate}")
+        return candidate.read_bytes()
     if local_dir:
         candidate = local_dir / row.source_id / row.file_name
         if not candidate.is_file():
