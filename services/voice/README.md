@@ -18,9 +18,10 @@ brew install portaudio
 cd services/voice && uv sync --extra mic
 export AWS_PROFILE=careonex-team AWS_DEFAULT_REGION=us-east-1 CAREONEX_RETRIEVE_URL=http://localhost:8080
 uv run careonex-voice            # speak; Enter to quit
-# Speakers instead of headphones? The client gates mic audio during playback (NOVA_SONIC_ECHO_GATE,
-# default RMS 1500; raise it if the assistant still interrupts itself, lower it if your barge-in is
-# ignored). NOVA_SONIC_HALF_DUPLEX=1 mutes the mic while it speaks (no barge-in at all).
+# Speakers instead of headphones? An adaptive gate measures the echo while the assistant speaks and
+# forwards only mic audio 2.5x louder (NOVA_SONIC_ECHO_RATIO; lower it if your interruptions are
+# ignored, raise it if the assistant interrupts itself). NOVA_SONIC_ECHO_GATE=0 disables the gate;
+# NOVA_SONIC_HALF_DUPLEX=1 mutes the mic while it speaks (no barge-in at all).
 uv run careonex-voice-smoke --question "Does JACC have an income limit?" --play
 ```
 

@@ -11,7 +11,10 @@ from typing import Any, Optional
 from nova_sonic.config import (
     CHANNELS,
     CHUNK_FRAMES,
-    ECHO_GATE_RMS,
+    ECHO_GATE_ENABLED,
+    ECHO_GATE_HOLD_CHUNKS,
+    ECHO_GATE_MIN_RMS,
+    ECHO_GATE_RATIO,
     HALF_DUPLEX,
     INPUT_SAMPLE_RATE,
     OUTPUT_SAMPLE_RATE,
@@ -30,17 +33,49 @@ def rms_int16(data: bytes) -> float:
     return math.sqrt(sum(s * s for s in samples) / len(samples))
 
 
-def should_forward(data: bytes, playing: bool, gate_rms: int = ECHO_GATE_RMS, half_duplex: bool = HALF_DUPLEX) -> bool:
-    """Decide whether a mic chunk goes to Nova. Everything passes when the assistant is silent;
-    during playback, half-duplex drops all audio and the gate drops anything quieter than gate_rms."""
-    if not playing:
-        return True
-    if half_duplex:
+class EchoGate:
+    """Adaptive gate for microphone audio while the assistant is speaking.
+
+    The echo floor is an exponential moving average of the mic RMS measured during playback for
+    chunks judged to be echo. A chunk is forwarded when its RMS exceeds both `min_rms` and
+    `ratio * floor`; it then holds the gate open for `hold_chunks` so speech onsets survive.
+    When the assistant is silent everything is forwarded and the floor is left untouched."""
+
+    def __init__(self, enabled: bool = ECHO_GATE_ENABLED, half_duplex: bool = HALF_DUPLEX, min_rms: int = ECHO_GATE_MIN_RMS,
+                 ratio: float = ECHO_GATE_RATIO, hold_chunks: int = ECHO_GATE_HOLD_CHUNKS, alpha: float = 0.2) -> None:
+        self.enabled, self.half_duplex = enabled, half_duplex
+        self.min_rms, self.ratio, self.hold_chunks, self.alpha = min_rms, ratio, hold_chunks, alpha
+        self.floor = 0.0
+        self._hold = 0
+        self.forwarded_during_playback = 0
+        self.dropped = 0
+
+    @property
+    def threshold(self) -> float:
+        return max(float(self.min_rms), self.ratio * self.floor)
+
+    def should_forward(self, data: bytes, playing: bool) -> bool:
+        if not playing:
+            self._hold = 0
+            return True
+        if self.half_duplex:
+            self.dropped += 1
+            return False
+        if not self.enabled:
+            return True
+        if self._hold > 0:
+            self._hold -= 1
+            self.forwarded_during_playback += 1
+            return True
+        level = rms_int16(data)
+        if level > self.threshold:
+            self._hold = self.hold_chunks
+            self.forwarded_during_playback += 1
+            return True
+        # Treat as echo: learn the floor from it (fast attack on first sample, then smooth).
+        self.floor = level if self.floor == 0.0 else (1 - self.alpha) * self.floor + self.alpha * level
+        self.dropped += 1
         return False
-    if gate_rms <= 0:
-        return True
-    return rms_int16(data) >= gate_rms
-from nova_sonic.session import NovaSonicSession
 
 
 class DuplexAudio:
@@ -74,7 +109,7 @@ class DuplexAudio:
         )
         self._playback_task: asyncio.Task[None] | None = None
         self._last_write = 0.0  # monotonic time of the last speaker write
-        self.gated_chunks = 0
+        self.gate = EchoGate()
 
     @property
     def playing(self) -> bool:
@@ -82,10 +117,8 @@ class DuplexAudio:
 
     def _on_mic(self, in_data, frame_count, time_info, status):
         if self.running and in_data:
-            if should_forward(in_data, self.playing):
+            if self.gate.should_forward(in_data, self.playing):
                 asyncio.run_coroutine_threadsafe(self.session.send_audio(in_data), self._loop)
-            else:
-                self.gated_chunks += 1
         return (None, self._pyaudio_mod.paContinue)
 
     async def _play(self) -> None:
@@ -115,8 +148,9 @@ class DuplexAudio:
         print("Listening. Speak anytime — you can interrupt the assistant.")
         if HALF_DUPLEX:
             print("Half-duplex: the mic is muted while the assistant speaks (NOVA_SONIC_HALF_DUPLEX=1).")
-        elif ECHO_GATE_RMS > 0:
-            print(f"Echo gate: while the assistant speaks, only mic audio louder than RMS {ECHO_GATE_RMS} is sent (NOVA_SONIC_ECHO_GATE). Headphones avoid echo entirely.")
+        elif ECHO_GATE_ENABLED:
+            print(f"Adaptive echo gate: while the assistant speaks, mic audio must be {ECHO_GATE_RATIO:g}x louder than the measured echo "
+                  f"(min RMS {ECHO_GATE_MIN_RMS}) to count as an interruption. NOVA_SONIC_ECHO_RATIO lowers/raises it; headphones avoid echo entirely.")
         print("Press Enter to end the session.")
         await self.session.start_audio()
         self.running = True
@@ -146,4 +180,7 @@ class DuplexAudio:
             self._pyaudio.terminate()
         finally:
             self._pyaudio = None
+        if ECHO_GATE_ENABLED and not HALF_DUPLEX:
+            print(f"Echo gate stats: echo floor RMS {self.gate.floor:.0f}, threshold {self.gate.threshold:.0f}, "
+                  f"forwarded during playback {self.gate.forwarded_during_playback}, dropped {self.gate.dropped}.")
         await self.session.close()

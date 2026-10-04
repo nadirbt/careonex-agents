@@ -100,7 +100,8 @@ Optional environment variables:
 | `NOVA_SONIC_ENDPOINTING` | `MEDIUM`                   | `HIGH` / `MEDIUM` / `LOW` turn detection |
 | `AWS_DEFAULT_REGION`     | `us-east-1`                | Bedrock region                           |
 | `CAREONEX_RETRIEVE_URL`  | unset                      | retrieve service; unset = tool says "unavailable" |
-| `NOVA_SONIC_ECHO_GATE`   | `1500`                     | RMS level mic audio must exceed during playback to count as barge-in; `0` disables |
+| `NOVA_SONIC_ECHO_GATE`   | `1`                        | adaptive echo gate during playback; `0` disables |
+| `NOVA_SONIC_ECHO_RATIO`  | `2.5`                      | how much louder than the measured echo your voice must be to interrupt |
 | `NOVA_SONIC_HALF_DUPLEX` | unset                      | `1` mutes the mic while the assistant speaks (no barge-in) |
 
 ## How barge-in works
