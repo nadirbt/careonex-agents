@@ -68,14 +68,33 @@ def lookup_program_info_sync(args: dict[str, Any]) -> dict:
     passages = [
         {
             "text": p.get("text", "")[:1200],
-            "source": p.get("title") or p.get("source_url"),
-            "source_url": p.get("source_url"),
+            "document": _spoken_title(p.get("title")),
             "program": p.get("program"),
             "effective_date": p.get("effective_date"),
+            "year": (p.get("effective_date") or "")[:4] or None,
         }
         for p in result.get("passages", [])
     ]
-    return {"passages": passages, "latency_ms": result.get("latency_ms"), "guidance": "Answer only from these passages and name the source. If they do not answer the question, say a person will follow up."}
+    # Newest first so the model's default is the current figure.
+    passages.sort(key=lambda p: p.get("effective_date") or "", reverse=True)
+    return {
+        "passages": passages,
+        "latency_ms": result.get("latency_ms"),
+        "guidance": (
+            "Answer only from these passages. Prefer the passage with the latest effective_date when figures differ and "
+            "say the year. Refer to the document in plain words (e.g. 'the state's 2026 program table'); do not say "
+            "'source', do not read URLs or symbols. If the passages do not answer the question, say a person will follow up."
+        ),
+    }
+
+
+def _spoken_title(title: str | None) -> str | None:
+    """Make a document title speakable: drop site-name prefixes separated by '|' and file-ish noise."""
+    if not title:
+        return None
+    parts = [p.strip() for p in title.split("|") if p.strip()]
+    best = parts[-1] if parts else title
+    return best.replace("(Web-English)", "").replace(".pdf", "").strip()
 
 
 async def handle_tool(name: str, args_json: str) -> str:

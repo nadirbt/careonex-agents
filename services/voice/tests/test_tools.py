@@ -45,4 +45,18 @@ def test_lookup_calls_retrieve_and_trims(monkeypatch):
     monkeypatch.setattr(t, "_post_json", fake_post)
     out = lookup_program_info_sync({"query": "JACC income limit", "program": "JACC"})
     assert seen["url"] == "http://retrieve:8080/retrieve" and seen["payload"]["program"] == "JACC"
-    assert len(out["passages"][0]["text"]) == 1200 and out["passages"][0]["source"] == "JACC" and out["latency_ms"] == 123
+    assert len(out["passages"][0]["text"]) == 1200 and out["passages"][0]["document"] == "JACC" and out["latency_ms"] == 123
+    assert out["passages"][0]["year"] == "2026" and "source" not in out["guidance"].lower().replace("source'", "")
+
+
+def test_passages_sorted_newest_first_and_titles_speakable(monkeypatch):
+    import nova_sonic.tools as t
+
+    monkeypatch.setattr(t, "RETRIEVE_URL", "http://retrieve:8080")
+    monkeypatch.setattr(t, "_post_json", lambda url, payload, timeout: {"passages": [
+        {"text": "old", "title": "NJ Division of Aging Services | 2026 Program Guide", "effective_date": "2025-03-23"},
+        {"text": "new", "title": "DoAS Programs Side-by-Side (2026)", "effective_date": "2026-03-01"},
+    ]})
+    out = lookup_program_info_sync({"query": "JACC income limit"})
+    assert [p["text"] for p in out["passages"]] == ["new", "old"]
+    assert out["passages"][1]["document"] == "2026 Program Guide"
