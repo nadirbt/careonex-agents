@@ -8,7 +8,8 @@ The mic stays open while Sonic talks. Built-in server barge-in stops generation 
 
 ## What you need
 
-- Python 3.11 or 3.12
+- Python 3.12 (managed by `uv`; the Bedrock SDK requires >= 3.12)
+- Docker Desktop (every component runs as a container)
 - AWS credentials with Amazon Bedrock access (SigV4 — **not** a Bedrock API key)
 - An AWS account permitted to invoke **Nova 2 Sonic** in `us-east-1`
 - Headset recommended: speaker echo can look like a barge-in to the model
@@ -16,15 +17,29 @@ The mic stays open while Sonic talks. Built-in server barge-in stops generation 
 
 
 
-## Setup
+## Layout
+
+Every component is a container under `services/` with its own `Dockerfile` and uv `pyproject.toml`;
+`docker-compose.yml` wires them and `make run` runs the data pipeline end to end:
+
+| Service | Does |
+| --- | --- |
+| `data` | ensures the S3 bucket; fetches the source catalog into `raw/` with metadata sidecars |
+| `extract` | raw PDF/HTML -> clean Markdown under `text/` |
+| `chunk` | Markdown -> section-aware chunks under `chunks/`, one object per chunk |
+| `kb-sync` | S3 Vectors index + Bedrock Knowledge Base over `chunks/`; runs ingestion |
+| `retrieve` | HTTP API: question + filters -> cited passages (`:8080`) |
+| `voice` | this Nova 2 Sonic client; the container runs a mic-free smoke test with tool use |
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
+brew install portaudio awscli        # portaudio only for the laptop microphone client
+aws sso login --profile careonex-team
+export AWS_PROFILE=careonex-team AWS_DEFAULT_REGION=us-east-1
+make build && make run               # pipeline
+make serve                           # retrieval API
+make smoke                           # voice round trip through the API
+make test                            # offline tests for all services
 ```
-
-
 
 ## AWS credentials (local development)
 
@@ -63,17 +78,20 @@ Later, configure a separate `careonex-team` profile and switch `AWS_PROFILE`. Te
 
 Check **Billing → Credits** for available credits and expiry. After a short test, use **Cost Explorer**, filter to **Amazon Bedrock**, and view daily **Unblended cost**, excluding **Credit** and **Refund** charge types to see usage before offsets. Billing data is delayed; credits do not make usage inherently free.
 
-## Run
+## Run the voice client on a laptop
 
 ```bash
-source .venv/bin/activate
-python -m nova_sonic
+cd services/voice
+uv sync --extra mic
+export CAREONEX_RETRIEVE_URL=http://localhost:8080   # after `make serve`
+uv run careonex-voice
 ```
 
-Speak after the “Listening” line. Interrupt mid-reply to hear barge-in. Press Enter to close the session.
+Speak after the "Listening" line. Interrupt mid-reply to hear barge-in. Press Enter to close the session.
+Ask about a program ("Does Medicaid pay for someone to come to the house?") and the model calls
+`lookup_program_info`, which asks the retrieve service for cited passages.
 
 Optional environment variables:
-
 
 | Variable                 | Default                    | Purpose                                  |
 | ------------------------ | -------------------------- | ---------------------------------------- |
@@ -81,9 +99,7 @@ Optional environment variables:
 | `NOVA_SONIC_VOICE_ID`    | `matthew`                  | Output voice                             |
 | `NOVA_SONIC_ENDPOINTING` | `MEDIUM`                   | `HIGH` / `MEDIUM` / `LOW` turn detection |
 | `AWS_DEFAULT_REGION`     | `us-east-1`                | Bedrock region                           |
-
-
-
+| `CAREONEX_RETRIEVE_URL`  | unset                      | retrieve service; unset = tool says "unavailable" |
 
 ## How barge-in works
 

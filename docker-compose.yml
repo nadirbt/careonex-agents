@@ -1,4 +1,4 @@
-# One command runs the pipeline: `docker compose up` (or `make run`).
+# One command runs the pipeline: `make run` (== docker compose up data ingest extract chunk kb-sync).
 # Each service is its own container with its own Dockerfile + pyproject.toml (see CLAUDE.md).
 #
 # AWS credentials come from the host's ~/.aws (SSO profile). Run
@@ -9,33 +9,90 @@ x-aws-env: &aws-env
   AWS_PROFILE: ${AWS_PROFILE:-careonex-team}
   AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-east-1}
   AWS_SDK_LOAD_CONFIG: "1"
+  # Leave empty to use ac215-program-kb-<account-id>; set to reuse an existing bucket.
+  CAREONEX_KB_BUCKET: ${CAREONEX_KB_BUCKET:-}
+
+x-mounts: &mounts
+  volumes:
+    # SSO token cache lives under ~/.aws/sso/cache; mounted read-write so botocore can refresh it.
+    - ${HOME}/.aws:/home/app/.aws
+    # Pipeline outputs: snapshot manifests, retrieval example, smoke-test report (git-ignored).
+    - ./data:/data
 
 services:
+  # 1. Ensure the knowledge bucket exists (idempotent).
   data:
     build: ./services/data
     image: careonex/data:local
-    environment:
-      <<: *aws-env
-      # Leave empty to use careonex-program-kb-<account-id>; set to reuse an existing bucket.
-      CAREONEX_KB_BUCKET: ${CAREONEX_KB_BUCKET:-}
-    volumes:
-      # SSO token cache lives under ~/.aws/sso/cache; mounted read-write so botocore can refresh it.
-      - ${HOME}/.aws:/home/app/.aws
-      # Snapshot manifests land here (git-ignored).
-      - ./data:/data
+    environment: *aws-env
+    <<: *mounts
     command: ["ensure-buckets"]
 
-  # The pipeline step: fetch every catalog source into the knowledge bucket.
-  # Runs after `data` so the bucket exists.
+  # 2. Catalog sources -> raw/ with .metadata.json sidecars.
   ingest:
     image: careonex/data:local
     depends_on:
-      data:
-        condition: service_completed_successfully
+      data: { condition: service_completed_successfully }
+    environment: *aws-env
+    <<: *mounts
+    command: ["ingest"]
+
+  # 3. raw/ PDF+HTML -> clean Markdown under text/.
+  extract:
+    build: ./services/extract
+    image: careonex/extract:local
+    depends_on:
+      ingest: { condition: service_completed_successfully }
+    environment: *aws-env
+    <<: *mounts
+    command: ["run"]
+
+  # 4. text/ -> section-aware chunks under chunks/ (one object per chunk).
+  chunk:
+    build: ./services/chunk
+    image: careonex/chunk:local
+    depends_on:
+      extract: { condition: service_completed_successfully }
+    environment: *aws-env
+    <<: *mounts
+    command: ["run"]
+
+  # 5. S3 Vectors index + Bedrock Knowledge Base over chunks/; run ingestion.
+  kb-sync:
+    build: ./services/kb-sync
+    image: careonex/kb-sync:local
+    depends_on:
+      chunk: { condition: service_completed_successfully }
     environment:
       <<: *aws-env
-      CAREONEX_KB_BUCKET: ${CAREONEX_KB_BUCKET:-}
-    volumes:
-      - ${HOME}/.aws:/home/app/.aws
-      - ./data:/data
-    command: ["ingest"]
+      CAREONEX_KB_ROLE_ARN: ${CAREONEX_KB_ROLE_ARN:-}
+    <<: *mounts
+    command: ["sync"]
+
+  # 6. Retrieval API (long-running). `make serve`.
+  retrieve:
+    build: ./services/retrieve
+    image: careonex/retrieve:local
+    environment:
+      <<: *aws-env
+      CAREONEX_KB_ID: ${CAREONEX_KB_ID:-}
+    <<: *mounts
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=2).status == 200 else 1)"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    command: ["serve"]
+
+  # 7. Voice smoke test: WAV question -> Nova 2 Sonic -> tool call -> spoken reply. `make smoke`.
+  voice:
+    build: ./services/voice
+    image: careonex/voice:local
+    depends_on:
+      retrieve: { condition: service_healthy }
+    environment:
+      <<: *aws-env
+      CAREONEX_RETRIEVE_URL: http://retrieve:8080
+    <<: *mounts
