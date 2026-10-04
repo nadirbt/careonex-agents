@@ -7,15 +7,16 @@ build:
 	docker compose build
 
 # The whole data pipeline, one command: bucket -> raw -> text -> chunks -> knowledge base
-run:
+# Builds first: the source catalog is baked into the data image, so a catalog edit needs a rebuild.
+run: build
 	docker compose up --abort-on-container-exit --exit-code-from kb-sync data ingest extract chunk kb-sync
 
 # Retrieval API on :8080 (keeps running)
-serve:
+serve: build
 	docker compose up retrieve
 
 # Voice smoke test against the running retrieve service (starts it if needed)
-smoke:
+smoke: build
 	docker compose run --rm voice
 
 status:
