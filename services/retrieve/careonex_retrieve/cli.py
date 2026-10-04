@@ -24,7 +24,7 @@ def cmd_serve(args: argparse.Namespace) -> int:
 def cmd_query(args: argparse.Namespace) -> int:
     runtime = config.session().client("bedrock-agent-runtime")
     flt = build_filter(args.program, args.year, args.jurisdiction, args.source_id)
-    result = retrieve(runtime, config.knowledge_base_id(), args.query, args.top_k, flt)
+    result = retrieve(runtime, config.knowledge_base_id(), args.query, args.top_k, flt, latest_only=not args.all_years)
     out = result.as_dict()
     print(json.dumps(out, indent=2, ensure_ascii=False))
     if args.save:
@@ -49,6 +49,7 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--jurisdiction")
     q.add_argument("--source-id")
     q.add_argument("--top-k", type=int, default=config.DEFAULT_TOP_K)
+    q.add_argument("--all-years", action="store_true", help="also return passages whose figures are superseded by a newer year")
     q.add_argument("--save", action="store_true", help="also write data/retrieval-example.json")
     q.add_argument("--data-dir", default=config.DATA_DIR)
     q.set_defaults(fn=cmd_query)

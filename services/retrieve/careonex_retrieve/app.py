@@ -33,6 +33,7 @@ class RetrieveRequest(BaseModel):
     jurisdiction: str | None = None
     source_id: str | None = None
     top_k: int = Field(default=config.DEFAULT_TOP_K, ge=1, le=20)
+    latest_only: bool = True  # withhold older-year figures for a program when a newer year exists
 
 
 @app.get("/health")
@@ -47,4 +48,4 @@ def post_retrieve(req: RetrieveRequest) -> dict:
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(status_code=503, detail=f"knowledge base not available: {exc}") from exc
     flt = build_filter(req.program, req.year, req.jurisdiction, req.source_id)
-    return retrieve(runtime(), kb_id, req.query, req.top_k, flt).as_dict()
+    return retrieve(runtime(), kb_id, req.query, req.top_k, flt, latest_only=req.latest_only).as_dict()

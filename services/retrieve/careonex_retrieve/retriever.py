@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 import time
 from dataclasses import asdict, dataclass, field
 
@@ -29,9 +30,45 @@ class RetrievalResult:
     top_k: int
     latency_ms: int
     passages: list[Passage] = field(default_factory=list)
+    superseded: list[dict] = field(default_factory=list)  # older-year passages withheld from the answer set
 
     def as_dict(self) -> dict:
         return {**asdict(self), "passages": [asdict(p) for p in self.passages]}
+
+
+_YEAR_RE = re.compile(r"\b(20[2-3]\d)\b")
+
+
+def figure_year(p: Passage) -> int | None:
+    """The year a passage's figures apply to: the latest year named in its text (documents often quote
+    last year's limits), else the year of its effective date."""
+    years = [int(y) for y in _YEAR_RE.findall(p.text or "")]
+    if years:
+        return max(years)
+    if p.effective_date and p.effective_date[:4].isdigit():
+        return int(p.effective_date[:4])
+    return None
+
+
+def prefer_latest(passages: list[Passage]) -> tuple[list[Passage], list[dict]]:
+    """Policy: when a newer year's passage exists for the same program, older-year passages are not
+    offered to the model. They stay in the index; this only shapes the answer set. Passages with no
+    detectable year are kept."""
+    newest: dict[str, int] = {}
+    for p in passages:
+        y = figure_year(p)
+        if y is not None:
+            key = p.program or ""
+            newest[key] = max(newest.get(key, 0), y)
+    kept, dropped = [], []
+    for p in passages:
+        y = figure_year(p)
+        key = p.program or ""
+        if y is not None and y < newest.get(key, y):
+            dropped.append({"program": p.program, "year": y, "superseded_by_year": newest[key], "title": p.title, "s3_key": p.s3_key})
+        else:
+            kept.append(p)
+    return kept, dropped
 
 
 # Exact `program` labels as they appear in the catalog sidecars. S3 Vectors supports only exact-match
@@ -111,14 +148,25 @@ def _passage(item: dict) -> Passage:
     )
 
 
-def retrieve(runtime, kb_id: str, query: str, top_k: int = 5, flt: dict | None = None) -> RetrievalResult:
-    vcfg: dict = {"numberOfResults": top_k}
+CANDIDATE_MULTIPLIER = 2
+MIN_CANDIDATES = 10
+
+
+def retrieve(runtime, kb_id: str, query: str, top_k: int = 5, flt: dict | None = None, latest_only: bool = True) -> RetrievalResult:
+    # Ask for more than top_k so a newer-year passage has the chance to supersede an older one,
+    # then return the best top_k of what survives the policy.
+    n = max(top_k * CANDIDATE_MULTIPLIER, MIN_CANDIDATES) if latest_only else top_k
+    vcfg: dict = {"numberOfResults": n}
     if flt:
         vcfg["filter"] = flt
     t0 = time.perf_counter()
     resp = runtime.retrieve(knowledgeBaseId=kb_id, retrievalQuery={"text": query}, retrievalConfiguration={"vectorSearchConfiguration": vcfg})
     latency_ms = int((time.perf_counter() - t0) * 1000)
-    result = RetrievalResult(query=query, knowledge_base_id=kb_id, filter=flt, top_k=top_k, latency_ms=latency_ms,
-                             passages=[_passage(i) for i in resp.get("retrievalResults", [])])
-    log.info("retrieve %dms k=%d filter=%s hits=%d q=%r", latency_ms, top_k, bool(flt), len(result.passages), query[:80])
+    passages = [_passage(i) for i in resp.get("retrievalResults", [])]
+    superseded: list[dict] = []
+    if latest_only:
+        passages, superseded = prefer_latest(passages)
+    passages = passages[:top_k]
+    result = RetrievalResult(query=query, knowledge_base_id=kb_id, filter=flt, top_k=top_k, latency_ms=latency_ms, passages=passages, superseded=superseded)
+    log.info("retrieve %dms k=%d filter=%s hits=%d superseded=%d q=%r", latency_ms, top_k, bool(flt), len(passages), len(superseded), query[:80])
     return result
