@@ -6,6 +6,7 @@ import array
 import asyncio
 import math
 import time
+from collections import deque
 from typing import Any, Optional
 
 from nova_sonic.config import (
@@ -34,25 +35,38 @@ def rms_int16(data: bytes) -> float:
 
 
 class EchoGate:
-    """Adaptive gate for microphone audio while the assistant is speaking.
+    """Output-correlated echo gate for microphone audio while the assistant is speaking.
 
-    The echo floor is an exponential moving average of the mic RMS measured during playback for
-    chunks judged to be echo. A chunk is forwarded when its RMS exceeds both `min_rms` and
-    `ratio * floor`; it then holds the gate open for `hold_chunks` so speech onsets survive.
-    When the assistant is silent everything is forwarded and the floor is left untouched."""
+    The client knows what it is playing. Expected echo at the mic is `k * output_rms`, where
+    output_rms is the loudest speaker chunk in the last `window_s` (covers device latency and
+    room reverb) and k is the echo coupling learned online from chunks judged to be echo. A mic
+    chunk is forwarded when its RMS exceeds `max(min_rms, ratio * k * output_rms)`; it then holds
+    the gate open for `hold_chunks` so speech onsets survive. In the assistant's pauses output_rms
+    falls to ~0 and the bar drops to `min_rms`, so a caller can always get a word in.
+    When the assistant is silent everything is forwarded."""
 
     def __init__(self, enabled: bool = ECHO_GATE_ENABLED, half_duplex: bool = HALF_DUPLEX, min_rms: int = ECHO_GATE_MIN_RMS,
-                 ratio: float = ECHO_GATE_RATIO, hold_chunks: int = ECHO_GATE_HOLD_CHUNKS, alpha: float = 0.2) -> None:
+                 ratio: float = ECHO_GATE_RATIO, hold_chunks: int = ECHO_GATE_HOLD_CHUNKS, window_s: float = 0.3,
+                 k_init: float = 0.3, alpha: float = 0.1) -> None:
         self.enabled, self.half_duplex = enabled, half_duplex
-        self.min_rms, self.ratio, self.hold_chunks, self.alpha = min_rms, ratio, hold_chunks, alpha
-        self.floor = 0.0
+        self.min_rms, self.ratio, self.hold_chunks, self.window_s, self.alpha = min_rms, ratio, hold_chunks, window_s, alpha
+        self.k = k_init  # echo coupling: mic RMS per unit of output RMS
+        self._out: deque[tuple[float, float]] = deque(maxlen=64)
         self._hold = 0
         self.forwarded_during_playback = 0
         self.dropped = 0
+        self.clock = time.monotonic
 
-    @property
-    def threshold(self) -> float:
-        return max(float(self.min_rms), self.ratio * self.floor)
+    def note_output(self, pcm: bytes) -> None:
+        self._out.append((self.clock(), rms_int16(pcm)))
+
+    def recent_output_rms(self) -> float:
+        now = self.clock()
+        levels = [r for (ts, r) in self._out if now - ts <= self.window_s]
+        return max(levels) if levels else 0.0
+
+    def threshold(self, output_rms: float) -> float:
+        return max(float(self.min_rms), self.ratio * self.k * output_rms)
 
     def should_forward(self, data: bytes, playing: bool) -> bool:
         if not playing:
@@ -68,18 +82,14 @@ class EchoGate:
             self.forwarded_during_playback += 1
             return True
         level = rms_int16(data)
-        if self.floor == 0.0:
-            # First chunk of this playback: calibrate the echo floor, never forward. A genuine
-            # interruption in the first ~32 ms of a reply is vanishingly rare.
-            self.floor = max(level, 1.0)
-            self.dropped += 1
-            return False
-        if level > self.threshold:
+        out = self.recent_output_rms()
+        if level > self.threshold(out):
             self._hold = self.hold_chunks
             self.forwarded_during_playback += 1
             return True
-        # Treat as echo: keep learning the floor from it.
-        self.floor = (1 - self.alpha) * self.floor + self.alpha * level
+        # Judged echo: refine the coupling estimate from it (only when there is real output to compare to).
+        if out > 100:
+            self.k = min(3.0, max(0.02, (1 - self.alpha) * self.k + self.alpha * (level / out)))
         self.dropped += 1
         return False
 
@@ -145,6 +155,7 @@ class DuplexAudio:
                 if not self.running or self.session.barge_in:
                     break
                 piece = audio[offset : offset + write_chunk]
+                self.gate.note_output(piece)
                 self._last_write = time.monotonic()
                 await asyncio.get_event_loop().run_in_executor(None, self._output.write, piece)
                 self._last_write = time.monotonic()
@@ -155,8 +166,9 @@ class DuplexAudio:
         if HALF_DUPLEX:
             print("Half-duplex: the mic is muted while the assistant speaks (NOVA_SONIC_HALF_DUPLEX=1).")
         elif ECHO_GATE_ENABLED:
-            print(f"Adaptive echo gate: while the assistant speaks, mic audio must be {ECHO_GATE_RATIO:g}x louder than the measured echo "
-                  f"(min RMS {ECHO_GATE_MIN_RMS}) to count as an interruption. NOVA_SONIC_ECHO_RATIO lowers/raises it; headphones avoid echo entirely.")
+            print(f"Echo gate: mic audio counts as an interruption only when {ECHO_GATE_RATIO:g}x louder than the echo expected from what is "
+                  f"playing right now (min RMS {ECHO_GATE_MIN_RMS}). NOVA_SONIC_ECHO_RATIO adjusts; NOVA_SONIC_HALF_DUPLEX=1 mutes the mic "
+                  f"during replies; headphones avoid echo entirely.")
         print("Press Enter to end the session.")
         await self.session.start_audio()
         self.running = True
@@ -187,6 +199,6 @@ class DuplexAudio:
         finally:
             self._pyaudio = None
         if ECHO_GATE_ENABLED and not HALF_DUPLEX:
-            print(f"Echo gate stats: echo floor RMS {self.gate.floor:.0f}, threshold {self.gate.threshold:.0f}, "
+            print(f"Echo gate stats: learned coupling k={self.gate.k:.3f} (mic RMS per output RMS), "
                   f"forwarded during playback {self.gate.forwarded_during_playback}, dropped {self.gate.dropped}.")
         await self.session.close()
