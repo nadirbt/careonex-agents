@@ -6,6 +6,26 @@ and the NJ FamilyCare "MLTSS Application Guidance" (April 2026). Figures below a
 row says otherwise; the state updates them each January and March. A county agency decides eligibility;
 these are the published limits, not a decision.
 
+## Which programs apply at which age (check this before suggesting a program)
+
+- Under 18: NJ FamilyCare children's coverage and the Personal Care Assistant (PCA) benefit through the
+  child's health plan; not JACC, not PACE, not Statewide Respite, not Medicare.
+- Age 18 and older: Statewide Respite Care Program (care recipient with a chronic disability and an unpaid
+  caregiver); NJ FamilyCare / Medicaid PCA hours through the health plan if enrolled in Medicaid.
+- Age 21 and older: MLTSS (nursing-home level of care plus Medicaid financial limits).
+- Age 55 and older: PACE (must live in a PACE service area and need nursing-home level of care).
+- Age 60 and older: JACC and Older Americans Act services (meals, aide hours, respite through the county).
+- Age 65 and older, or under 65 with a qualifying disability: Medicare home health (short-term, skilled,
+  homebound; not long-term custodial help), PAAD, Senior Gold, Medicare Savings Programs.
+- Any age with Alzheimer's disease or a related dementia and an unpaid caregiver: Alzheimer's Adult Day Services Program.
+- Any age, any income, caring for someone: the county ADRC at 1-877-222-3737 gives options counseling for free.
+- Veterans of any age: VA Homemaker and Home Health Aide care through VA health care; VA Aid and Attendance
+  requires a VA pension (generally age 65 or older or permanently disabled).
+
+Example: a 55-year-old who needs help at home is too young for JACC and Older Americans Act services (60+)
+and for Medicare (65+ unless disabled). The paths to check are Medicaid (MLTSS or PCA through a health plan),
+PACE at 55 in a PACE area, Statewide Respite if a family member provides unpaid care, and private pay.
+
 ## MLTSS (NJ FamilyCare / Medicaid Managed Long Term Services and Supports) 2026
 
 - Who: age 21 or older, needs nursing-home level of care (hands-on help with 3 or more daily activities, or
@@ -32,6 +52,25 @@ these are the published limits, not a decision.
   emergency response system, attendant care, home-delivered meals, social adult day care, home-based
   supportive care, adult day health, transportation.
 - Apply: county Area Agency on Aging / ADRC, 1-877-222-3737. State funded; no federal Medicaid match.
+
+## PACE (Program of All-inclusive Care for the Elderly)
+
+- Who: age 55 or older, lives in the service area of a New Jersey PACE organization, needs nursing-home level
+  of care, and can live safely in the community with PACE support.
+- What: all Medicare and Medicaid services plus anything the care team deems necessary: primary care, drugs,
+  adult day health, home and personal care, transportation, hospital and nursing-home care when needed.
+- Cost: no cost share for people with Medicaid; a monthly premium for others. Participants may leave PACE at any time.
+- Apply: contact the PACE organization serving the county, or the ADRC at 1-877-222-3737.
+
+## NJ FamilyCare / Medicaid Personal Care Assistant (PCA) benefit
+
+- Who: any age, enrolled in NJ FamilyCare (regular Medicaid; income about $1,330 per month and assets $4,000 for a
+  single adult in 2026, higher limits for children and pregnant people). Does not require nursing-home level of care.
+- What: hours of hands-on help with daily activities at home from a licensed agency, authorized by a nurse
+  assessment from the member's health plan (Horizon NJ Health, Aetna Better Health, UnitedHealthcare Community
+  Plan, Wellpoint, or Fidelis Care) and reassessed yearly. The Personal Preference Program lets the member
+  self-direct those hours and hire family.
+- Apply: call the member services number on the health plan card and ask for a PCA assessment.
 
 ## Statewide Respite Care Program (SRCP) 2026
 
