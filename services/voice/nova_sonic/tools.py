@@ -34,6 +34,8 @@ LOOKUP_PROGRAM_INFO = {
                         "query": {"type": "string", "description": "The caller's question, rephrased as a search query."},
                         "program": {"type": "string", "description": "Program name if known, e.g. MLTSS, JACC, PACE, PCA, Medicare, VA."},
                         "county": {"type": "string", "description": "New Jersey county if the caller mentioned one."},
+                        "age": {"type": "string", "description": "Age of the person who needs care, if the caller said it."},
+                        "situation": {"type": "string", "description": "Other facts the caller gave that affect eligibility: has Medicaid, veteran, dementia, lives with family, income if stated."},
                     },
                     "required": ["query"],
                 }
@@ -108,7 +110,14 @@ def lookup_program_info_sync(args: dict[str, Any]) -> dict:
         return {"error": "empty query", "guidance": "Ask the caller to repeat the question."}
     if not RETRIEVE_URL:
         return {"error": "knowledge base unavailable", "guidance": "Tell the caller a CareOneX team member will follow up with the exact figures.", "passages": []}
-    payload = {"query": query, "top_k": 4}
+    facts = []
+    if args.get("age"):
+        facts.append(f"person aged {args['age']}")
+    if args.get("situation"):
+        facts.append(str(args["situation"]))
+    if args.get("county"):
+        facts.append(f"{args['county']} County")
+    payload = {"query": f"{query} ({'; '.join(facts)})" if facts else query, "top_k": 5}
     if args.get("program"):
         payload["program"] = str(args["program"])
     try:
@@ -132,10 +141,14 @@ def lookup_program_info_sync(args: dict[str, Any]) -> dict:
         "passages": passages,
         "latency_ms": result.get("latency_ms"),
         "guidance": (
-            "Answer only from these passages. Prefer the passage with the latest effective_date when figures differ and "
-            "say the year. Refer to the document in plain words (e.g. 'the state's 2026 program table'); do not say "
-            "'source', do not read URLs or symbols. If the passages do not answer the question, say a person will follow up."
-        ),
+            "Answer only from these passages. Before naming a program, check every fact the caller gave (age, Medicaid "
+            "status, veteran, dementia, caregiver at home) against that program's requirements in the passages; do not "
+            "suggest a program the person does not meet, and say in one short sentence why it is out (e.g. 'JACC starts "
+            "at 60'). Prefer the passage with the latest effective_date when figures differ and say the year. Refer to "
+            "the document in plain words (e.g. 'the state's 2026 program table'); do not say 'source', do not read URLs "
+            "or symbols. If the passages do not answer the question, say a person will follow up."
+        )
+        + (f" Caller facts to check against: {'; '.join(facts)}." if facts else ""),
     }
 
 

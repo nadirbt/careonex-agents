@@ -90,3 +90,14 @@ def test_prompt_start_lists_both_tools():
 
     names = [t["toolSpec"]["name"] for t in json.loads(events.prompt_start("p", TOOLS))["event"]["promptStart"]["toolConfiguration"]["tools"]]
     assert names == ["lookup_program_info", "save_intake"]
+
+
+def test_lookup_passes_caller_facts_into_query_and_guidance(monkeypatch):
+    import nova_sonic.tools as t
+
+    monkeypatch.setattr(t, "RETRIEVE_URL", "http://retrieve:8080")
+    seen = {}
+    monkeypatch.setattr(t, "_post_json", lambda url, payload, timeout: seen.update(payload) or {"passages": []})
+    out = lookup_program_info_sync({"query": "how to pay for home care", "age": "55", "situation": "has no Medicaid", "county": "Bergen"})
+    assert "person aged 55" in seen["query"] and "Bergen County" in seen["query"]
+    assert "Caller facts to check against: person aged 55" in out["guidance"] and "JACC starts" in out["guidance"]

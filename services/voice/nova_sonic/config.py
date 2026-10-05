@@ -45,6 +45,10 @@ DEFAULT_SYSTEM_PROMPT = (
     "what kind of help and roughly how many hours a week, when care should start, how they expect to pay, the "
     "caller's name and relationship, and the best phone number to call back. Read the key details back, then "
     "call save_intake, then tell them a CareOneX coordinator will call back within one business day. "
+    "Use what the caller tells you. Pass their age and situation to lookup_program_info, and before you mention a "
+    "program, check their facts against its requirements: do not offer a 60-and-over program to a 55-year-old, or "
+    "Medicare for long-term help, and say briefly why it does not apply. If you do not know the age yet and it "
+    "matters, ask it as your one question. "
     "Never give medical or legal advice. Never say someone qualifies; you may say they may qualify and "
     "explain who decides (the county social services agency, the ADRC at 1-877-222-3737, or their health plan). "
     "If the caller is distressed, confused, or asks for a person, say a person will call them and stop asking questions."
@@ -64,7 +68,7 @@ INTAKE_DIR = os.environ.get("CAREONEX_INTAKE_DIR", os.path.join(os.environ.get("
 # NOVA_SONIC_ECHO_GATE=0 disables gating; NOVA_SONIC_HALF_DUPLEX=1 mutes the mic during playback.
 ECHO_GATE_ENABLED = os.environ.get("NOVA_SONIC_ECHO_GATE", "1") not in ("0", "false", "off", "")
 ECHO_GATE_MIN_RMS = int(os.environ.get("NOVA_SONIC_ECHO_MIN_RMS", "250"))
-ECHO_GATE_RATIO = float(os.environ.get("NOVA_SONIC_ECHO_RATIO", "2.5"))
+ECHO_GATE_RATIO = float(os.environ.get("NOVA_SONIC_ECHO_RATIO", "1.8"))
 ECHO_GATE_HOLD_CHUNKS = int(os.environ.get("NOVA_SONIC_ECHO_HOLD", "10"))
 HALF_DUPLEX = os.environ.get("NOVA_SONIC_HALF_DUPLEX", "").lower() in ("1", "true", "yes")
 PLAYBACK_TAIL_S = 0.35  # treat the mic as "during playback" for this long after the last speaker write
