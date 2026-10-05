@@ -120,11 +120,30 @@ def lookup_program_info_sync(args: dict[str, Any]) -> dict:
     payload = {"query": f"{query} ({'; '.join(facts)})" if facts else query, "top_k": 5}
     if args.get("program"):
         payload["program"] = str(args["program"])
+    queries = [payload]
+    if args.get("age"):
+        # "How do I pay" phrasings pull payer documents and miss the eligibility-by-age summary;
+        # a second, age-specific lookup guarantees the model sees which programs the person can use.
+        queries.append({"query": f"which New Jersey home care programs can a {args['age']} year old use", "top_k": 3})
+    raw: list[dict] = []
+    latency_total = 0
     try:
-        result = _post_json(f"{RETRIEVE_URL}/retrieve", payload, RETRIEVE_TIMEOUT_S)
+        for q in queries:
+            result = _post_json(f"{RETRIEVE_URL}/retrieve", q, RETRIEVE_TIMEOUT_S)
+            raw.extend(result.get("passages", []))
+            latency_total += int(result.get("latency_ms") or 0)
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
         log.warning("retrieve failed: %s", exc)
         return {"error": f"retrieve failed: {exc}", "guidance": "Tell the caller a CareOneX team member will follow up with the exact figures.", "passages": []}
+    seen: set[str] = set()
+    deduped = []
+    for p in raw:
+        key = p.get("s3_key") or p.get("text", "")[:80]
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(p)
+    result = {"passages": deduped[:6], "latency_ms": latency_total}
     passages = [
         {
             "text": p.get("text", "")[:1200],

@@ -96,8 +96,19 @@ def test_lookup_passes_caller_facts_into_query_and_guidance(monkeypatch):
     import nova_sonic.tools as t
 
     monkeypatch.setattr(t, "RETRIEVE_URL", "http://retrieve:8080")
-    seen = {}
-    monkeypatch.setattr(t, "_post_json", lambda url, payload, timeout: seen.update(payload) or {"passages": []})
+    calls = []
+
+    def fake_post(url, payload, timeout):
+        calls.append(payload)
+        if "55 year old" in payload["query"]:
+            return {"latency_ms": 5, "passages": [{"text": "Age 55 and older: PACE ...", "title": "curated", "s3_key": "chunks/c/age.md", "effective_date": "2026-03-01"}]}
+        return {"latency_ms": 7, "passages": [{"text": "Medicare pays ...", "title": "10969", "s3_key": "chunks/m/1.md", "effective_date": "2025-06-24"},
+                                              {"text": "Age 55 and older: PACE ...", "title": "curated", "s3_key": "chunks/c/age.md", "effective_date": "2026-03-01"}]}
+
+    monkeypatch.setattr(t, "_post_json", fake_post)
     out = lookup_program_info_sync({"query": "how to pay for home care", "age": "55", "situation": "has no Medicaid", "county": "Bergen"})
-    assert "person aged 55" in seen["query"] and "Bergen County" in seen["query"]
+    assert len(calls) == 2 and "person aged 55" in calls[0]["query"] and "Bergen County" in calls[0]["query"]
+    assert "55 year old" in calls[1]["query"]
+    assert len(out["passages"]) == 2  # duplicate age chunk removed
+    assert out["passages"][0]["text"].startswith("Age 55")  # newest first
     assert "Caller facts to check against: person aged 55" in out["guidance"] and "JACC starts" in out["guidance"]
