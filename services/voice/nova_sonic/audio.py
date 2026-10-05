@@ -45,12 +45,17 @@ class EchoGate:
     falls to ~0 and the bar drops to `min_rms`, so a caller can always get a word in.
     When the assistant is silent everything is forwarded."""
 
+    # Coupling is tracked as a slowly decaying PEAK, not an average. Averaging over chunks judged to be
+    # echo is biased low (the quietest echo chunks, between the assistant's words, dominate), and a low k
+    # lets real echo through: a live run drifted to k=0.03 and the assistant started hearing itself again.
+    K_INIT, K_MIN, K_MAX, K_DECAY = 0.25, 0.08, 1.0, 0.999  # decay per echo chunk (~32 ms): halves in ~22 s
+
     def __init__(self, enabled: bool = ECHO_GATE_ENABLED, half_duplex: bool = HALF_DUPLEX, min_rms: int = ECHO_GATE_MIN_RMS,
                  ratio: float = ECHO_GATE_RATIO, hold_chunks: int = ECHO_GATE_HOLD_CHUNKS, window_s: float = 0.3,
-                 k_init: float = 0.3, alpha: float = 0.1) -> None:
+                 k_init: float | None = None) -> None:
         self.enabled, self.half_duplex = enabled, half_duplex
-        self.min_rms, self.ratio, self.hold_chunks, self.window_s, self.alpha = min_rms, ratio, hold_chunks, window_s, alpha
-        self.k = k_init  # echo coupling: mic RMS per unit of output RMS
+        self.min_rms, self.ratio, self.hold_chunks, self.window_s = min_rms, ratio, hold_chunks, window_s
+        self.k = k_init if k_init is not None else self.K_INIT  # echo coupling: mic RMS per unit of output RMS
         self._out: deque[tuple[float, float]] = deque(maxlen=64)
         self._hold = 0
         self.forwarded_during_playback = 0
@@ -87,9 +92,10 @@ class EchoGate:
             self._hold = self.hold_chunks
             self.forwarded_during_playback += 1
             return True
-        # Judged echo: refine the coupling estimate from it (only when there is real output to compare to).
+        # Judged echo: track the coupling as a decaying peak (only when there is real output to compare to).
         if out > 100:
-            self.k = min(3.0, max(0.02, (1 - self.alpha) * self.k + self.alpha * (level / out)))
+            observed = level / out
+            self.k = min(self.K_MAX, max(self.K_MIN, observed, self.k * self.K_DECAY))
         self.dropped += 1
         return False
 
