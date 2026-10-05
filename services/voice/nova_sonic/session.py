@@ -77,7 +77,13 @@ def _load_sso_credentials() -> dict[str, str] | None:
         return None
     if not frozen:
         return None
-    frozen = frozen.get_frozen_credentials()
+    try:
+        frozen = frozen.get_frozen_credentials()
+    except Exception as exc:  # botocore TokenRetrievalError etc.: SSO session expired
+        raise SystemExit(
+            f"AWS session for profile '{profile}' is not valid ({type(exc).__name__}). "
+            f"Run:  aws sso login --profile {profile}   and start again."
+        ) from exc
     creds = {"access_key_id": frozen.access_key, "secret_access_key": frozen.secret_key}
     if frozen.token:
         creds["session_token"] = frozen.token
