@@ -89,7 +89,7 @@ def test_prompt_start_lists_both_tools():
     from nova_sonic.tools import TOOLS
 
     names = [t["toolSpec"]["name"] for t in json.loads(events.prompt_start("p", TOOLS))["event"]["promptStart"]["toolConfiguration"]["tools"]]
-    assert names == ["lookup_program_info", "save_intake"]
+    assert names == ["lookup_program_info", "intake_next_question", "save_intake"]
 
 
 def test_lookup_passes_caller_facts_into_query_and_guidance(monkeypatch):
@@ -112,3 +112,22 @@ def test_lookup_passes_caller_facts_into_query_and_guidance(monkeypatch):
     assert len(out["passages"]) == 2  # duplicate age chunk removed
     assert out["passages"][0]["text"].startswith("Age 55")  # newest first
     assert "Caller facts to check against: person aged 55" in out["guidance"] and "JACC starts" in out["guidance"]
+
+
+def test_intake_next_question_returns_exactly_one_question_in_order():
+    from nova_sonic.tools import INTAKE_ORDER, intake_next_question_sync
+
+    first = intake_next_question_sync({})
+    assert first["field"] == "relationship" and first["remaining"] == len(INTAKE_ORDER)
+    assert first["ask"].count("?") == 1
+
+    later = intake_next_question_sync({"relationship": "daughter", "care_recipient_age": "55", "county": "Hudson"})
+    assert later["field"] == "kind_of_help" and later["remaining"] == len(INTAKE_ORDER) - 3
+
+    done = intake_next_question_sync({f: "x" for f, _ in INTAKE_ORDER})
+    assert done["complete"] is True and "save_intake" in done["guidance"]
+
+
+def test_intake_next_question_via_handle_tool_skips_known_fields():
+    out = json.loads(asyncio.run(handle_tool("intake_next_question", json.dumps({"care_recipient_age": "77", "relationship": "son"}))))
+    assert out["field"] == "county"

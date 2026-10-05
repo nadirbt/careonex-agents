@@ -77,7 +77,59 @@ SAVE_INTAKE = {
     }
 }
 
-TOOLS: list[dict] = [LOOKUP_PROGRAM_INFO, SAVE_INTAKE]
+# Intake as a state machine owned by the client: the model reports what it already knows and gets back the
+# ONE next question to ask. Order matters for a worried caller: who and what first, phone number last.
+INTAKE_ORDER: list[tuple[str, str]] = [
+    ("relationship", "Who is the care for, and how are you related to them?"),
+    ("care_recipient_age", "How old are they?"),
+    ("county", "Which New Jersey county do they live in?"),
+    ("kind_of_help", "What kind of help do they need most, for example bathing and dressing, meals, company, or memory care?"),
+    ("hours_per_week", "Roughly how many hours a week, or would it be live-in?"),
+    ("timeline", "When would you like care to start?"),
+    ("payer", "How do you expect to pay for it: Medicaid, Medicare, VA, insurance, out of pocket, or not sure yet?"),
+    ("caller_name", "What is your name?"),
+    ("callback_phone", "What is the best phone number for the coordinator to call you back?"),
+]
+
+INTAKE_NEXT_QUESTION = {
+    "toolSpec": {
+        "name": "intake_next_question",
+        "description": (
+            "Use while helping someone arrange care. Pass every detail you already know; it returns the single next "
+            "question to ask, or tells you the intake is complete. Ask exactly that one question and nothing else."
+        ),
+        "inputSchema": {
+            "json": json.dumps(
+                {
+                    "type": "object",
+                    "properties": {k: {"type": "string", "description": v} for k, v in INTAKE_FIELDS.items()},
+                    "required": [],
+                }
+            )
+        },
+    }
+}
+
+
+def intake_next_question_sync(args: dict[str, Any]) -> dict:
+    known = {k: str(v).strip() for k, v in args.items() if k in INTAKE_FIELDS and str(v).strip()}
+    for field_name, question in INTAKE_ORDER:
+        if field_name not in known:
+            remaining = sum(1 for f, _ in INTAKE_ORDER if f not in known)
+            return {
+                "field": field_name,
+                "ask": question,
+                "remaining": remaining,
+                "guidance": "Ask only this one question, in your own warm words, then stop and wait. Do not add a second question.",
+            }
+    return {
+        "complete": True,
+        "known": known,
+        "guidance": "All details collected. Read the key details back in one or two sentences, ask if they are right, then call save_intake.",
+    }
+
+
+TOOLS: list[dict] = [LOOKUP_PROGRAM_INFO, INTAKE_NEXT_QUESTION, SAVE_INTAKE]
 
 
 def save_intake_sync(args: dict[str, Any]) -> dict:
@@ -187,6 +239,8 @@ async def handle_tool(name: str, args_json: str) -> str:
         args = {"query": args_json}
     if name == "lookup_program_info":
         result = await asyncio.get_running_loop().run_in_executor(None, lookup_program_info_sync, args)
+    elif name == "intake_next_question":
+        result = intake_next_question_sync(args)
     elif name == "save_intake":
         result = await asyncio.get_running_loop().run_in_executor(None, save_intake_sync, args)
     else:
