@@ -6,6 +6,7 @@ import asyncio
 import base64
 import json
 import os
+import time
 import uuid
 from typing import Any
 
@@ -130,9 +131,13 @@ class NovaSonicSession:
         self._role = ""
         self._show_assistant_text = False
         self.tools = TOOLS
+        # One record per toolUse, in arrival order. Tool tasks run concurrently, so a record is found by
+        # its toolUseId (never "the last one") when the output comes back.
         self.tool_calls: list[dict[str, Any]] = []
+        self._tool_calls_by_id: dict[str, dict[str, Any]] = {}
         self.transcripts: list[tuple[str, str]] = []
         self._tool_tasks: set[asyncio.Task[None]] = set()
+        self.last_audio_output_at: float | None = None  # time.monotonic() of the latest audioOutput event
 
     def _init_client(self) -> None:
         config = Config(
@@ -142,13 +147,15 @@ class NovaSonicSession:
         )
         self.client = BedrockRuntimeClient(config=config)
 
-    async def send_event(self, payload: str) -> None:
+    async def send_event(self, payload: str) -> bool:
+        """Send one event; False when the stream is already closed and nothing was sent."""
         if not self.stream:
-            return
+            return False
         chunk = InvokeModelWithBidirectionalStreamInputChunk(
             value=BidirectionalInputPayloadPart(bytes_=payload.encode("utf-8"))
         )
         await self.stream.input_stream.send(chunk)
+        return True
 
     async def start(self) -> None:
         if not self.client:
@@ -225,13 +232,7 @@ class NovaSonicSession:
                         self.transcripts.append(("USER", text))
 
                 elif "toolUse" in event:
-                    use = event["toolUse"]
-                    name, tool_use_id, args_json = use.get("toolName", ""), use.get("toolUseId", ""), use.get("content", "{}")
-                    print(f"Tool: {name}({args_json})")
-                    self.tool_calls.append({"name": name, "toolUseId": tool_use_id, "input": args_json})
-                    task = asyncio.create_task(self._run_tool(name, tool_use_id, args_json))
-                    self._tool_tasks.add(task)
-                    task.add_done_callback(self._tool_tasks.discard)
+                    self._start_tool(event["toolUse"])
 
                 elif "contentEnd" in event:
                     if event["contentEnd"].get("stopReason") == "INTERRUPTED":
@@ -240,6 +241,7 @@ class NovaSonicSession:
 
                 elif "audioOutput" in event:
                     audio_b64 = event["audioOutput"]["content"]
+                    self.last_audio_output_at = time.monotonic()
                     await self.audio_queue.put(base64.b64decode(audio_b64))
 
         except asyncio.CancelledError:
@@ -247,12 +249,32 @@ class NovaSonicSession:
         except Exception as exc:
             print(f"Error reading Sonic stream: {exc}")
 
+    def _start_tool(self, use: dict) -> asyncio.Task[None]:
+        name, tool_use_id, args_json = use.get("toolName", ""), use.get("toolUseId", ""), use.get("content", "{}")
+        print(f"Tool: {name}({args_json})")
+        record = {"name": name, "toolUseId": tool_use_id, "input": args_json, "requested_at": time.monotonic(), "result_sent": False}
+        self.tool_calls.append(record)
+        self._tool_calls_by_id[tool_use_id] = record
+        task = asyncio.create_task(self._run_tool(name, tool_use_id, args_json))
+        self._tool_tasks.add(task)
+        task.add_done_callback(self._tool_tasks.discard)
+        return task
+
     async def _run_tool(self, name: str, tool_use_id: str, args_json: str) -> None:
+        record = self._tool_calls_by_id[tool_use_id]
         result_json = await handle_tool(name, args_json)
-        self.tool_calls[-1]["output"] = result_json
+        record["output"] = result_json
         content_name = str(uuid.uuid4())
-        for payload in events.tool_result_events(self.prompt_name, content_name, tool_use_id, result_json):
-            await self.send_event(payload)
+        try:
+            sent = [await self.send_event(p) for p in events.tool_result_events(self.prompt_name, content_name, tool_use_id, result_json)]
+        except Exception as exc:  # noqa: BLE001 - recorded for the report; the response loop carries on
+            record["send_error"] = str(exc)
+            print(f"Tool result for {name} not delivered: {exc}")
+            return
+        # Delivered only if all three events (contentStart, toolResult, contentEnd) went out on an open stream.
+        record["result_sent"] = all(sent)
+        if record["result_sent"]:
+            record["result_sent_at"] = time.monotonic()
 
     async def close(self) -> None:
         if not self.stream:

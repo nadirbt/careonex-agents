@@ -45,7 +45,9 @@ def test_lookup_calls_retrieve_and_trims(monkeypatch):
     monkeypatch.setattr(t, "_post_json", fake_post)
     out = lookup_program_info_sync({"query": "JACC income limit", "program": "JACC"})
     assert seen["url"] == "http://retrieve:8080/retrieve" and seen["payload"]["program"] == "JACC"
-    assert len(out["passages"][0]["text"]) == 1200 and out["passages"][0]["document"] == "JACC" and out["latency_ms"] == 123
+    # Over-long text is cut at the chunker cap with an explicit marker, not silently.
+    assert out["passages"][0]["text"].startswith("x" * 2800) and out["passages"][0]["text"].endswith("not all of it is shown]")
+    assert out["passages"][0]["document"] == "JACC" and out["latency_ms"] == 123
     assert out["passages"][0]["year"] == "2026" and "source" not in out["guidance"].lower().replace("source'", "")
 
 

@@ -6,7 +6,9 @@ someone to come to the house to help her?" which should make the model call look
     careonex-voice-smoke                      # fixture question
     careonex-voice-smoke --wav my.wav         # any 16 kHz mono 16-bit WAV
     careonex-voice-smoke --question "..."     # synthesize with macOS `say` (host only)
-Exit 0 when reply audio came back; 1 otherwise. Writes <data-dir>/voice-smoke.json with transcripts and tool calls."""
+    careonex-voice-smoke --expect-tool lookup_program_info   # also require a working tool round trip
+Exit 0 when reply audio came back (and, with --expect-tool, the tool checks passed); 1 otherwise.
+Writes <data-dir>/voice-smoke.json with transcripts, tool calls and check results."""
 
 from __future__ import annotations
 
@@ -54,6 +56,50 @@ def synthesize(text: str) -> Path:
     return out
 
 
+def check_expected_tool(tool_calls: list[dict], name: str, last_audio_at: float | None = None) -> dict:
+    """Evidence that `name` made a full round trip: called, its handler succeeded, and its result was sent
+    back on the stream. A fluent answer alone is not evidence. For lookup_program_info, success means the
+    retrieve service returned at least one passage. `reply_after_result` is reported but not required."""
+    calls = [c for c in tool_calls if c.get("name") == name]
+    report: dict = {"tool": name, "called": bool(calls), "calls": len(calls), "succeeded": False, "result_sent": False, "reply_after_result": None, "complete_round_trip": False, "failures": []}
+    if not calls:
+        report["failures"].append(f"{name} was never called (tools called: {[c.get('name') for c in tool_calls] or 'none'})")
+        return report
+    complete = False
+    for c in calls:
+        label = f"{name} {c.get('toolUseId')}"
+        ok = False
+        if "output" not in c:
+            report["failures"].append(f"{label}: no output recorded (handler did not finish)")
+        else:
+            try:
+                out = json.loads(c["output"])
+            except json.JSONDecodeError:
+                out = None
+                report["failures"].append(f"{label}: output is not JSON")
+            if out is not None:
+                if out.get("error"):
+                    report["failures"].append(f"{label}: tool reported an error: {out['error']}")
+                elif name == "lookup_program_info" and not out.get("passages"):
+                    report["failures"].append(f"{label}: retrieval returned no passages")
+                else:
+                    ok = True
+                    report["succeeded"] = True
+        if c.get("result_sent"):
+            report["result_sent"] = True
+            if last_audio_at is not None and c.get("result_sent_at") is not None:
+                report["reply_after_result"] = bool(report["reply_after_result"]) or last_audio_at > c["result_sent_at"]
+        else:
+            report["failures"].append(f"{label}: result was not sent back to the session" + (f" ({c['send_error']})" if c.get("send_error") else ""))
+        complete = complete or (ok and bool(c.get("result_sent")))
+    report["complete_round_trip"] = complete
+    if complete:
+        report["failures"] = []  # one call succeeded and was delivered; an earlier failed attempt does not fail the run
+    elif not report["failures"]:
+        report["failures"].append(f"no single {name} call both succeeded and was delivered")
+    return report
+
+
 async def round_trip(pcm: bytes, timeout: float, idle: float) -> tuple[bytes, NovaSonicSession]:
     session = NovaSonicSession()
     print(f"Opening bidirectional stream: {MODEL_ID} in {AWS_REGION}")
@@ -95,6 +141,7 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--timeout", type=float, default=60.0)
     p.add_argument("--idle", type=float, default=2.5, help="seconds of silence after the last audio that ends the test")
     p.add_argument("--play", action="store_true", help="afplay the reply (host only)")
+    p.add_argument("--expect-tool", metavar="NAME", help="fail unless NAME was called, succeeded, and its result was sent back (e.g. lookup_program_info)")
     args = p.parse_args(argv)
 
     src = synthesize(args.question) if args.question else (args.wav or FIXTURE)
@@ -102,6 +149,7 @@ def main(argv: list[str] | None = None) -> None:
     print(f"Question audio: {src} ({len(pcm) / INPUT_SAMPLE_RATE / SAMPLE_WIDTH_BYTES:.1f}s)")
 
     reply, session = asyncio.run(round_trip(pcm, args.timeout, args.idle))
+    tool_check = check_expected_tool(session.tool_calls, args.expect_tool, session.last_audio_output_at) if args.expect_tool else None
     report = {
         "model": MODEL_ID,
         "question_wav": str(src),
@@ -109,6 +157,7 @@ def main(argv: list[str] | None = None) -> None:
         "transcripts": session.transcripts,
         "tool_calls": session.tool_calls,
         "retrieve_url": os.environ.get("CAREONEX_RETRIEVE_URL", ""),
+        "expect_tool": tool_check,
     }
     args.data_dir.mkdir(parents=True, exist_ok=True)
     (args.data_dir / "voice-smoke.json").write_text(json.dumps(report, indent=2, ensure_ascii=False))
@@ -117,6 +166,14 @@ def main(argv: list[str] | None = None) -> None:
         sys.exit(1)
     out = args.data_dir / "voice-smoke-reply.wav"
     write_wav(out, reply)
+    if tool_check is not None:
+        print(f"Tool check {args.expect_tool}: called={tool_check['called']} succeeded={tool_check['succeeded']} "
+              f"result_sent={tool_check['result_sent']} reply_after_result={tool_check['reply_after_result']}")
+        if not tool_check["complete_round_trip"]:
+            for reason in tool_check["failures"]:
+                print(f"  - {reason}")
+            print(f"FAIL: reply audio came back, but no complete {args.expect_tool} round trip; report {args.data_dir / 'voice-smoke.json'}")
+            sys.exit(1)
     print(f"PASS: {report['reply_seconds']}s of reply audio -> {out}; {len(session.tool_calls)} tool call(s); report {args.data_dir / 'voice-smoke.json'}")
     if args.play and shutil.which("afplay"):
         subprocess.run(["afplay", str(out)], check=False)
