@@ -51,7 +51,14 @@ def _build_default_system_prompt() -> str:
     try:
         from nova_sonic.knowledge import render_grounding_block
 
-        grounding = render_grounding_block()
+        # include_unverified=True is intentional for now: every card is
+        # still "draft-needs-verification" (no one has fact-checked the
+        # figures against the source yet), but we need the full corpus in
+        # the prompt to test retrieval/answer quality before that review
+        # happens. Flip to False once a human has verified the cards and
+        # this is wired to a live caller -- see knowledge/README.md,
+        # "Re-crawl and staleness policy."
+        grounding = render_grounding_block(include_unverified=True)
     except Exception:
         grounding = ""
 
