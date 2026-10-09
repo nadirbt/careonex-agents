@@ -52,7 +52,15 @@ def prompt_start(prompt_name: str) -> str:
     )
 
 
-def text_content_start(prompt_name: str, content_name: str, role: str) -> str:
+def text_content_start(
+    prompt_name: str, content_name: str, role: str, *, interactive: bool = False
+) -> str:
+    """interactive=False is right for the SYSTEM prompt and conversation
+    history (the original use of this function). interactive=True is what
+    AWS calls "cross-modal input" -- a TEXT turn sent mid-session while an
+    AUDIO content stream is open, e.g. nova_sonic/smoke_test.py's text-only
+    USER turns. See docs.aws.amazon.com/nova/latest/nova2-userguide/
+    sonic-cross-modal.html."""
     return json.dumps(
         {
             "event": {
@@ -60,7 +68,7 @@ def text_content_start(prompt_name: str, content_name: str, role: str) -> str:
                     "promptName": prompt_name,
                     "contentName": content_name,
                     "type": "TEXT",
-                    "interactive": False,
+                    "interactive": interactive,
                     "role": role,
                     "textInputConfiguration": {"mediaType": "text/plain"},
                 }
