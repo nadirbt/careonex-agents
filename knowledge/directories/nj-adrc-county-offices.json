@@ -1,0 +1,113 @@
+{
+  "_meta": {
+    "description": "County-level Aging and Disability Resource Connection (ADRC) contacts. This is a lookup table for a tool call (e.g. get_county_office(county)), not a prose knowledge card -- see knowledge/README.md.",
+    "publisher": "NJ Dept. of Human Services, Division of Aging Services (DoAS)",
+    "source_url": "https://www.nj.gov/humanservices/doas/assistance/county-offices/",
+    "statewide_fallback_phone": "1-877-222-3737",
+    "fetch_date": "2026-09-28",
+    "status": "INCOMPLETE -- only counties confirmed from search results below are populated. Camden, Sussex, and Union counties are missing. Verify every entry (including the ones present) against the current 'NJ Division of Aging Services Program Guide' PDF (nj.gov/humanservices/doas/documents/DoAS Program Guide.pdf) before using in production. Do not add a county entry without a confirmed source."
+  },
+  "counties": {
+    "Atlantic": {
+      "office": "Atlantic County Office on Aging",
+      "phone": "609-645-7700 x4347",
+      "address": "101 South Shore Road, Shoreview Building, Office 217, Northfield, NJ 08225"
+    },
+    "Bergen": {
+      "office": "Bergen County Division of Senior Services",
+      "phone": "201-336-7400",
+      "address": "One Bergen County Plaza, 2nd Floor, Hackensack, NJ 07601-7076",
+      "email": "seniors@bergencountynj.gov"
+    },
+    "Burlington": {
+      "office": "Burlington County Office on Aging",
+      "phone": "609-265-5069",
+      "address": "Human Services Facility, 795 Woodlane Road, Westampton, NJ 08060 (mailing: PO Box 6000, Mount Holly, NJ 08060)"
+    },
+    "Cape May": {
+      "office": "Cape May County Department of Aging and Disability Services",
+      "phone": "609-886-2784 / 609-886-2785",
+      "address": "3801 Route 9 South, Unit 4, Rio Grande, NJ 08242"
+    },
+    "Cumberland": {
+      "office": "Cumberland County Office on Aging and Disabled",
+      "phone": "856-453-2220",
+      "address": "Administration Building, 800 East Commerce Street, Bridgeton, NJ 08302",
+      "email": "ADRC@CumberlandCountyNJ.gov"
+    },
+    "Essex": {
+      "office": "Essex County Division of Senior Services",
+      "phone": "973-395-8375",
+      "address": "465 Dr. Martin Luther King Jr. Blvd., Suite 102, Newark, NJ 07102"
+    },
+    "Gloucester": {
+      "office": "Gloucester County Division of Senior Services",
+      "phone": "856-384-6900",
+      "address": "115 Budd Blvd., West Deptford, NJ 08096"
+    },
+    "Hudson": {
+      "office": "Hudson County Office on Aging/ADRC",
+      "phone": "201-369-4313",
+      "address": "830 Bergen Avenue, Suite 3B, Jersey City, NJ 07306"
+    },
+    "Hunterdon": {
+      "office": "Hunterdon County Division of Senior, Disabilities and Veterans' Services",
+      "phone": "908-788-1361 / 908-788-1362 / 908-788-1363",
+      "address": "4 Gauntt Place, Building 1, PO Box 2900, Flemington, NJ 08822-2900"
+    },
+    "Mercer": {
+      "office": "Mercer County Office on Aging",
+      "phone": "609-989-6661 / 609-989-6662",
+      "address": "2210 Hamilton Avenue, Hamilton, NJ 08619 (mailing: 640 S. Broad St., PO Box 8068, Trenton, NJ 08650-0068)",
+      "email": "ADRC@mercercounty.org"
+    },
+    "Middlesex": {
+      "office": "Middlesex County Office of Aging and Disabled Services",
+      "phone": "732-745-3295",
+      "address": "75 Bayard Street, 5th Floor, New Brunswick, NJ 08901"
+    },
+    "Monmouth": {
+      "office": "Monmouth County Division of Aging, Disabilities and Veterans Services",
+      "phone": "732-431-7450",
+      "address": "3000 Kozloski Road, Freehold, NJ 07728",
+      "email": "Monmouthadvs@monmouthcounty.us"
+    },
+    "Morris": {
+      "office": "Morris County Division on Aging, Disabilities and Community Programming",
+      "phone": "973-285-6848",
+      "address": "340 West Hanover Avenue, Morris Twp., NJ 07960 (mailing: PO Box 900, Morristown, NJ 07963-0900)",
+      "email": "MorrisADRC@co.morris.nj.us"
+    },
+    "Ocean": {
+      "office": "Ocean County Office of Senior Services",
+      "phone": "732-929-2091",
+      "address": "1005 Hooper Avenue, Building #2 (mailing: PO Box 2191, Toms River, NJ 08754-2191)"
+    },
+    "Passaic": {
+      "office": "Passaic County Department of Senior Services, Disabilities and Veterans' Affairs",
+      "phone": "973-569-4060",
+      "address": "930 Riverview Drive, Suite 200, Totowa, NJ 07512"
+    },
+    "Salem": {
+      "office": "Salem County Office of Aging & Disabilities",
+      "phone": "856-339-8622",
+      "address": "110 Fifth Street, Suite 900, Salem, NJ 08079",
+      "email": "scseniors@salemcountynj.gov"
+    },
+    "Somerset": {
+      "office": "Somerset County Office on Aging and Disability Services",
+      "phone": "908-704-6346",
+      "toll_free": "1-888-747-1122",
+      "address": "27 Warren Street, 1st Floor, PO Box 3000, Somerville, NJ 08876",
+      "email": "OfficeAging@co.somerset.nj.us"
+    },
+    "Warren": {
+      "office": "Warren County Division of Aging and Disability Services",
+      "phone": "908-475-6591",
+      "toll_free": "1-877-222-3737",
+      "address": "Wayne Dumont, Jr. Admin. Bldg., 165 County Road, Suite 245, Route 519 South, Belvidere, NJ 07823-1949",
+      "email": "SeniorServices@co.warren.nj.us"
+    }
+  },
+  "missing_counties": ["Camden", "Sussex", "Union"]
+}
