@@ -83,10 +83,15 @@ async def ask(question: str, *, voice_output: bool = False, timeout_seconds: flo
             )
         )
         # session.update hardcodes output_modalities=["audio"] (see
-        # events.py), so a response.create override is only needed for the
-        # TEXT-only path below; the voice path just takes that default.
-        if not voice_output:
-            await ws.send(json.dumps(events.response_create(output_modalities=("text",))))
+        # events.py), but a response is NEVER generated automatically here
+        # -- there's no VAD-driven audio input in this script, so
+        # response.create must always be sent, text mode or voice mode.
+        # (Earlier version of this script only sent it for text mode,
+        # which made --voice hang forever waiting for a response that was
+        # never triggered -- caught by actually running --voice, not by
+        # reading the code.)
+        response_modalities = ("text",) if not voice_output else ("audio",)
+        await ws.send(json.dumps(events.response_create(output_modalities=response_modalities)))
 
         print(f"You: {question}")
         label = "spoken reply" if voice_output else "gpt-realtime-2.1"
