@@ -1,0 +1,25 @@
+{
+  "metadataAttributes": {
+    "source_id": "nj_doas",
+    "publisher": "NJ DHS Division of Aging Services (DoAS)",
+    "program": "County Offices on Aging / ADRC",
+    "title": "Division of Aging Services | County Offices on Aging",
+    "kind": "html",
+    "source_url": "https://www.nj.gov/humanservices/doas/assistance/county-offices/",
+    "final_url": "https://www.nj.gov/humanservices/doas/assistance/county-offices/",
+    "effective_date": "2026-08-11",
+    "effective_date_estimated": false,
+    "fetch_date": "2026-09-28",
+    "sha256": "54a15184154110029f0308061eb98030763da82e1c8201910670f192b153e892",
+    "jurisdiction": "NJ",
+    "county": "all",
+    "audience": "consumer",
+    "year": 2026,
+    "derived_from": "raw/nj_doas/nj_doas_county_offices_adrc.html",
+    "source_sha256": "de733d8c59f8a1f6765e41e9a401f45d82686d3ad49ea4368fffae06127a1785",
+    "text_sha256": "b9749cfbc7a3546848c5824e4407ba246d8d249a74b77d3d4a7a7a3b7ec99582",
+    "extractor": "markdownify",
+    "extractor_version": "3",
+    "chars": 5363
+  }
+}

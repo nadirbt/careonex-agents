@@ -1,0 +1,26 @@
+{
+  "metadataAttributes": {
+    "source_id": "careonex_curated",
+    "publisher": "CareOneX team (curated from NJ DoAS and DMAHS publications)",
+    "program": "All DoAS programs",
+    "title": "NJ home-care program limits 2026 (curated summary)",
+    "kind": "md",
+    "source_url": "curated/nj_doas_2026_program_limits.md",
+    "final_url": "curated/nj_doas_2026_program_limits.md",
+    "effective_date": "2026-03-01",
+    "effective_date_estimated": false,
+    "fetch_date": "2026-10-05",
+    "sha256": "0c1381ffa8d3835244ee67eb1227d1798d9cef6f45fc49f25d4f74d6f8044dbf",
+    "jurisdiction": "NJ",
+    "county": "all",
+    "audience": "consumer",
+    "year": 2026,
+    "note": "team-reviewed summary of the 2026 Side-by-Side table and MLTSS guidance; update every January and March",
+    "derived_from": "raw/careonex_curated/nj_doas_2026_program_limits.md",
+    "source_sha256": "0c1381ffa8d3835244ee67eb1227d1798d9cef6f45fc49f25d4f74d6f8044dbf",
+    "text_sha256": "abb02301201f5e0c8889d75925024024885df0a83c12960d6f0e6f03ed06de62",
+    "extractor": "passthrough",
+    "extractor_version": "3",
+    "chars": 8546
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "metadataAttributes": {
+    "source_id": "nj_dds",
+    "publisher": "NJ DHS Division of Disability Services (DDS)",
+    "program": "NJ FamilyCare / Medicaid PCA",
+    "title": "Personal Care Assistant (PCA) Services",
+    "kind": "html",
+    "source_url": "https://www.nj.gov/humanservices/dds/hottopics/personalcare",
+    "final_url": "https://www.nj.gov/humanservices/dds/hottopics/personalcare/",
+    "effective_date": "2026-10-04",
+    "effective_date_estimated": true,
+    "fetch_date": "2026-10-04",
+    "sha256": "7dbb5785383a6c94345d352eac844ae07b33adbaa7255da0560c7f8ff75a9cba",
+    "jurisdiction": "NJ",
+    "county": "all",
+    "audience": "consumer",
+    "year": 2026,
+    "note": "PCA benefit through NJ FamilyCare MCOs; effective_date set to fetch date",
+    "derived_from": "raw/nj_dds/nj_dds_personal_care_assistant.html",
+    "source_sha256": "9423c174024d30528b08bb7db5431fd7b76b6f1e78d2c9ed5d35b5d51ee24102",
+    "text_sha256": "9e71c06f6a0525ed21053ae812b981ed9b9fc916db5830b2f52af41dd84649d6",
+    "extractor": "markdownify",
+    "extractor_version": "3",
+    "chars": 3771
+  }
+}

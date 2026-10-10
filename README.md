@@ -1,97 +1,101 @@
-# CareOneX — Amazon Nova 2 Sonic
+# CareOneX — Voice Agent + RAG
 
-[https://github.com/aws-samples/amazon-nova-samples/tree/main/speech-to-speech/amazon-nova-2-sonic/sample-codes/console-python](https://github.com/aws-samples/amazon-nova-samples/tree/main/speech-to-speech/amazon-nova-2-sonic/sample-codes/console-python)
+Amazon Nova 2 Sonic voice assistant with a Bedrock Knowledge Base retrieval service, offline tests, and evaluation tools.
 
-Real-time speech-to-speech over Bedrock `InvokeModelWithBidirectionalStream` (`amazon.nova-2-sonic-v1:0`).
+**GitHub-ready distribution.** All application and evaluation features from the uploaded project are retained. Only local environments, caches, and private intake records are omitted. This update also fixes local voice intake storage diagnostics and shutdown handling; RAG code is unchanged. See [GitHub push guide](docs/GITHUB_PUSH.md) and [preparation report](CLEANUP_REPORT.md).
 
-The mic stays open while Sonic talks. Built-in server barge-in stops generation as soon as you speak; this client then drops queued playback so leftover audio does not keep talking over you.
+## Repository map
 
-## What you need
+| Path | Purpose |
+| --- | --- |
+| `services/voice/` | Live Nova 2 Sonic microphone client, conversation and intake tools, transcript/text evaluation |
+| `services/retrieve/` | RAG FastAPI server, model-free feedback expansion, RRF, parent-context utilities |
+| `services/data/` | Document source catalog and ingestion |
+| `services/extract/` | PDF/HTML text extraction |
+| `services/chunk/` | Chunking methods and experiments |
+| `services/kb-sync/` | Bedrock Knowledge Base sync/ingestion |
+| `evaluation/` | Benchmarks, reference answers, graded examples, test questions, and fixtures |
+| `docker-compose.yml`, `Makefile` | Container-based services and task commands |
+| `docs/EVALUATION.md` | How to run evaluation without changing RAG |
+| `TEAM_SETUP.md` | AWS SSO setup guidance (no stored credentials) |
+| `RAG_HANDOFF.md` | RAG operational notes; read before changing ingestion |
 
-- Python 3.11 or 3.12
-- AWS credentials with Amazon Bedrock access (SigV4 — **not** a Bedrock API key)
-- An AWS account permitted to invoke **Nova 2 Sonic** in `us-east-1`
-- Headset recommended: speaker echo can look like a barge-in to the model
-- PortAudio (`brew install portaudio` on macOS)
+## Prerequisites
 
+- Python **3.12** and [`uv`](https://docs.astral.sh/uv/)
+- AWS CLI with the team's AWS SSO profile and required Bedrock permissions
+- Docker Desktop for running the retrieval backend in containers
+- A working microphone and speakers/headphones for live voice
 
+Do not commit `.aws/`, environment secrets, saved caller information, or generated audio/transcripts. These are excluded from this ZIP and ignored by `.gitignore`.
 
-## Setup
+## Run on Windows (PowerShell)
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
+Open PowerShell in this repository's root folder. Log in to AWS:
+
+```powershell
+$env:AWS_PROFILE = "careonex-team"
+$env:AWS_DEFAULT_REGION = "us-east-1"
+$env:HOME = $HOME
+aws sso login --profile careonex-team
 ```
 
+**Window 1 — retrieval in Docker** (uses an existing Knowledge Base; does not reindex):
 
-
-## AWS credentials (local development)
-
-1. In **IAM → Users**, create `careonex-local` without console access. Add an inline policy named `CareOneXNovaSonic`:
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [{
-    "Effect": "Allow",
-    "Action": "bedrock:InvokeModel",
-    "Resource": "arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-2-sonic-v1:0"
-  }]
-}
+```powershell
+$env:CAREONEX_KB_ID = "UYC7EK0ZDV"  # example staging KB; replace with your actual KB ID
+$env:HOME = $HOME
+docker compose up --build retrieve
 ```
 
-1. Under that user's **Security credentials → Access keys**, create a key for **Command Line Interface (CLI)**. Use the IAM user's keys, not root keys.
-2. Run `aws configure --profile careonex-personal`. Enter the new access key and secret key, region `us-east-1`, and output format `json`.
+**Window 2 — live interactive voice on Windows:**
 
-This saves a named profile in `~/.aws/credentials`, alongside any existing `default` profile. Keep keys out of the repository and chat.
-
-Select the profile and verify it in the terminal you will use to run the app:
-
-```bash
-unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_SECURITY_TOKEN
-export AWS_PROFILE=careonex-personal
-export AWS_DEFAULT_REGION=us-east-1
-aws sts get-caller-identity
+```powershell
+$env:AWS_PROFILE = "careonex-team"
+$env:AWS_DEFAULT_REGION = "us-east-1"
+$env:CAREONEX_RETRIEVE_URL = "http://127.0.0.1:8080"
+$env:CAREONEX_VOICE_SEARCH_MODE = "feedback"
+uv run --python 3.12 --extra mic --directory services/voice python -c "import asyncio; from nova_sonic.__main__ import run; asyncio.run(run())"
 ```
 
-Confirm the returned account ID is your intended account and the ARN ends in `:user/careonex-local`. `InvalidClientTokenId` means the credentials need fixing; the app's “Listening” message alone does not verify authentication.
+Speak normally after `Listening...`; press **Enter** to stop. Try `$env:CAREONEX_VOICE_SEARCH_MODE = "baseline"` to disable query expansion without code changes. Language switching can be attempted on request; actual coverage depends on Nova Sonic.
 
-Later, configure a separate `careonex-team` profile and switch `AWS_PROFILE`. Team SSO requires updating this app's credential loader; deployed services should use IAM roles rather than personal keys.
+The intake tool saves JSON files **locally** under `services/voice/data/intakes/` (or an absolute path chosen with `CAREONEX_INTAKE_DIR`). The path and the number of successful records are printed after every call. An ordinary voice conversation does **not** create an intake automatically: the caller must agree to a callback, complete the brief intake, and explicitly confirm their ten-digit callback number. Look for `Intake saved: <absolute path>` in PowerShell. A `Tool: save_intake(...)` message alone does not mean saving succeeded.
 
-## Track test costs
+Check saved records from the project root in PowerShell:
 
-Check **Billing → Credits** for available credits and expiry. After a short test, use **Cost Explorer**, filter to **Amazon Bedrock**, and view daily **Unblended cost**, excluding **Credit** and **Refund** charge types to see usage before offsets. Billing data is delayed; credits do not make usage inherently free.
-
-## Run
-
-```bash
-source .venv/bin/activate
-python -m nova_sonic
+```powershell
+Get-ChildItem .\services\voice\data\intakes -Filter *.json
 ```
 
-Speak after the “Listening” line. Interrupt mid-reply to hear barge-in. Press Enter to close the session.
+**To record a synthetic test call's transcript and tool results for debugging (opt-in only):** before launching voice, set `$env:CAREONEX_EVAL_REPORT = (Join-Path (Get-Location) 'services/voice/data/synthetic-test-call.json')`. After the call ends, inspect that JSON's `tool_calls` for `save_intake`, its `output` (`saved: true` or `saved: false`), and `result_sent`. Remove/unset the variable afterward with `Remove-Item Env:CAREONEX_EVAL_REPORT`. Do not enable this for real callers without appropriate privacy/consent procedures. These records are ignored by Git. **Saving an intake is not a coordinator notification or a database integration.**
 
-Optional environment variables:
+## Testing and evaluation
 
+- Local voice tests: `uv run --python 3.12 --directory services/voice pytest -q`
+- Local retrieval tests: `uv run --python 3.12 --directory services/retrieve pytest -q`
+- All local tests: `make test` (requires GNU Make and project development dependencies)
+- Retrieval, chunking, and transcript/text evaluation: see [`docs/EVALUATION.md`](docs/EVALUATION.md).
 
-| Variable                 | Default                    | Purpose                                  |
-| ------------------------ | -------------------------- | ---------------------------------------- |
-| `NOVA_SONIC_MODEL_ID`    | `amazon.nova-2-sonic-v1:0` | Model ID                                 |
-| `NOVA_SONIC_VOICE_ID`    | `matthew`                  | Output voice                             |
-| `NOVA_SONIC_ENDPOINTING` | `MEDIUM`                   | `HIGH` / `MEDIUM` / `LOW` turn detection |
-| `AWS_DEFAULT_REGION`     | `us-east-1`                | Bedrock region                           |
+Some live AWS tests incur charges; ask the team before performing Knowledge Base ingestion or running `make run`.
 
+## Docker / Make
 
+| Command | Action |
+| --- | --- |
+| `docker compose up --build retrieve` | Run only the retrieval API on `localhost:8080` |
+| `make serve` | Build and serve the retrieval API |
+| `make smoke` | Run prerecorded Nova Sonic smoke test |
+| `make test` | Run local offline tests |
+| `make run` | **Rebuild/sync the data pipeline — do NOT use for routine voice testing** |
 
+Note: the Docker voice service is intended for a prerecorded smoke test. On Windows, run the interactive microphone client directly with `uv` as shown above.
 
-## How barge-in works
+## Known limitations
 
-1. Audio is streamed continuously as `audioInput` events (full duplex).
-2. Sonic detects speech while it is generating and stops on the server.
-3. It sends `{ "interrupted" : true }` on `textOutput`, and often `contentEnd.stopReason = INTERRUPTED`.
-4. The client stops the speaker and drains the playback queue. Generation is faster than playback, so queued chunks would otherwise keep talking.
+- `amazon.nova-lite-v1:0` direct text-model calls require IAM permission your team profile may not have. Model-free `feedback` retrieval does not invoke it.
+- Experiment results are not a substitute for human factual evaluation; grading files include provisional labels.
+- Knowledge Base resources and IAM permissions live in AWS; cloning this repository does not recreate them.
+- The baseline RAG implementation and the optional expansion/parent-context code are preserved exactly from the uploaded project.
 
-Sessions last up to about 8 minutes. Close with `contentEnd` → `promptEnd` → `sessionEnd`.
-
-Official samples: [amazon-nova-samples / amazon-nova-2-sonic](https://github.com/aws-samples/amazon-nova-samples/tree/main/speech-to-speech/amazon-nova-2-sonic).
+Licensed under the existing [`LICENSE`](LICENSE).

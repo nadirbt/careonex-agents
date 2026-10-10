@@ -1,0 +1,11 @@
+[
+  {
+    "query": "Does Medicaid cover help with bathing and dressing in New Jersey?",
+    "passages": [
+      {"s3_key":"example/a.md", "text":"JACC financial limits and application phone number", "score":0.68, "relevance":0},
+      {"s3_key":"example/b.md", "text":"NJ FamilyCare Medicaid PCA benefit provides home care help with bathing and dressing after a nurse assessment", "score":0.65, "relevance":2},
+      {"s3_key":"example/c.md", "text":"VA benefits cover home health aides for veterans", "score":0.63, "relevance":0},
+      {"s3_key":"example/d.md", "text":"Medicaid MLTSS eligibility assessment and in-home services for activities of daily living", "score":0.6, "relevance":1}
+    ]
+  }
+]

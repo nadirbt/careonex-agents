@@ -1,0 +1,26 @@
+{
+  "metadataAttributes": {
+    "source_id": "medicare_cms",
+    "publisher": "Centers for Medicare & Medicaid Services (CMS) via Medicare.gov",
+    "program": "Medicare home health benefit",
+    "title": "10969 Medicare and Home Health Care",
+    "kind": "pdf",
+    "source_url": "https://www.medicare.gov/publications/10969-medicare-and-home-health-care.pdf",
+    "final_url": "https://www.medicare.gov/publications/10969-medicare-and-home-health-care.pdf",
+    "effective_date": "2025-06-24",
+    "effective_date_estimated": false,
+    "fetch_date": "2026-09-28",
+    "sha256": "b9aeb0bf355cb8d955791853b638b270916c1d2414f8f5dabb10dda92315470a",
+    "jurisdiction": "US",
+    "county": "all",
+    "audience": "consumer",
+    "year": 2025,
+    "http_last_modified": "2025-06-30",
+    "derived_from": "raw/medicare_cms/cms_10969_medicare_and_home_health_care.pdf",
+    "source_sha256": "b9aeb0bf355cb8d955791853b638b270916c1d2414f8f5dabb10dda92315470a",
+    "text_sha256": "a806f3f3136b74a58dbcf66591bbca1ca109f1a91de751546f6461c32cd235ad",
+    "extractor": "pymupdf4llm",
+    "extractor_version": "3",
+    "chars": 34598
+  }
+}

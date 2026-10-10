@@ -1,0 +1,25 @@
+{
+  "metadataAttributes": {
+    "source_id": "nj_doas",
+    "publisher": "NJ DHS Division of Aging Services (DoAS)",
+    "program": "PACE",
+    "title": "Division of Aging Services | Program of All-inclusive Care for the Elderly (PACE)",
+    "kind": "html",
+    "source_url": "https://www.nj.gov/humanservices/doas/services/l-p/pace/",
+    "final_url": "https://www.nj.gov/humanservices/doas/services/l-p/pace/",
+    "effective_date": "2026-06-10",
+    "effective_date_estimated": false,
+    "fetch_date": "2026-09-28",
+    "sha256": "8dcea808a9a61284c226e4d0cd8bf9e0e5ca7f8563748389835862f04bd42b17",
+    "jurisdiction": "NJ",
+    "county": "all",
+    "audience": "consumer",
+    "year": 2026,
+    "derived_from": "raw/nj_doas/nj_doas_pace.html",
+    "source_sha256": "f02adc21f5013bd3e55a2a5f92d25dbfc14f83d281c08acce087f673d10fc555",
+    "text_sha256": "634a190bc82db935e8fbcb1d9e359da65fd403bcf040577e4e2ed4167aa813a7",
+    "extractor": "markdownify",
+    "extractor_version": "3",
+    "chars": 6164
+  }
+}

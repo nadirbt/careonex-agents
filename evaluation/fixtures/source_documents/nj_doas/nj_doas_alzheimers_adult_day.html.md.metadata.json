@@ -1,0 +1,25 @@
+{
+  "metadataAttributes": {
+    "source_id": "nj_doas",
+    "publisher": "NJ DHS Division of Aging Services (DoAS)",
+    "program": "Alzheimer's Adult Day Services Program",
+    "title": "Division of Aging Services | Alzheimer's Adult Day Services Program",
+    "kind": "html",
+    "source_url": "https://www.nj.gov/humanservices/doas/services/a-k/aads/",
+    "final_url": "https://www.nj.gov/humanservices/doas/services/a-k/aads/",
+    "effective_date": "2026-01-29",
+    "effective_date_estimated": false,
+    "fetch_date": "2026-09-28",
+    "sha256": "cfc0d4e5863f1a990fe1cafcb475e61b9514b6389943bfe1a0cc7c0af202c278",
+    "jurisdiction": "NJ",
+    "county": "all",
+    "audience": "consumer",
+    "year": 2026,
+    "derived_from": "raw/nj_doas/nj_doas_alzheimers_adult_day.html",
+    "source_sha256": "b1b10fc47345aae2709e4c9a00d26bd2629fbc77d2c9e094f717b974de14e647",
+    "text_sha256": "a064cd99ba07cd2563929b239fb3a9af4a92c03189074d57975851a1c1f25de3",
+    "extractor": "markdownify",
+    "extractor_version": "3",
+    "chars": 4042
+  }
+}

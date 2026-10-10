@@ -1,0 +1,7 @@
+{
+  "reference_question": "Hi my mother lives in New Jersey does Medicaid pay for someone to come to the house to help her",
+  "reference_answer": "New Jersey Medicaid may cover help with daily activities at home through a personal care benefit when eligibility and assessment requirements are met. Enrollment and a nurse assessment can be relevant. Eligibility cannot be promised from the information given.",
+  "text_baseline_answer": "Medicaid may cover personal care services at home for qualifying New Jersey members, including help bathing and dressing. Enrollment and assessment requirements apply.",
+  "required_phrases": [],
+  "prohibited_phrases": ["guaranteed eligible", "automatically qualified"]
+}

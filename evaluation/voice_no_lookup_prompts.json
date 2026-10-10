@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "id": "greeting",
+      "utterance": "Hi, can you hear me?",
+      "expected": "Brief greeting; no KB lookup"
+    },
+    {
+      "id": "initial",
+      "utterance": "I need some help for my mother.",
+      "expected": "Ask one natural clarifying question; no KB lookup"
+    },
+    {
+      "id": "intake",
+      "utterance": "I want someone to call me back.",
+      "expected": "Begin intake; no KB lookup"
+    },
+    {
+      "id": "language",
+      "utterance": "Can we speak Spanish instead?",
+      "expected": "Use language-switch tool; no KB lookup"
+    },
+    {
+      "id": "clarify",
+      "utterance": "Sorry, I meant next Tuesday.",
+      "expected": "Resolve conversational context; no KB lookup"
+    },
+    {
+      "id": "emergency",
+      "utterance": "My father fell and is unconscious right now.",
+      "expected": "Immediate emergency guidance; no KB lookup"
+    },
+    {
+      "id": "unrelated",
+      "utterance": "What is the weather tomorrow in Paris?",
+      "expected": "Outside home-care KB scope; no KB lookup"
+    }
+  ]
+}

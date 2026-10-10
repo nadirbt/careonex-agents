@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "knowledge_base_id": "XNHPKZAFJX",
+  "top_k": 3,
+  "candidate_k": 10,
+  "source_questions": "prior_graded examples",
+  "cases": [
+    {
+      "id": "medicaid_bathing",
+      "query": "Does Medicaid cover help with bathing and dressing in New Jersey?",
+      "program": "Medicaid",
+      "file": "cases/medicaid_bathing.json"
+    },
+    {
+      "id": "medicaid_eligibility",
+      "query": "My mother is 74 and needs help with daily activities. How can I tell if she qualifies for Medicaid home care in New Jersey?",
+      "program": "Medicaid",
+      "file": "cases/medicaid_eligibility.json"
+    }
+  ],
+  "note": "Two earlier manually reviewed / provisional cases, retained for offline demonstration only."
+}

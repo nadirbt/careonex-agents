@@ -1,0 +1,26 @@
+{
+  "metadataAttributes": {
+    "source_id": "nj_dmahs",
+    "publisher": "NJ DHS Division of Medical Assistance and Health Services (DMAHS)",
+    "program": "NJ FamilyCare / Medicaid MLTSS",
+    "title": "MLTSS Application Guidance",
+    "kind": "pdf",
+    "source_url": "https://www.nj.gov/humanservices/dmahs/documents/about/NJFC-ABD-MLTSS-BRO-E-2026_Web.pdf",
+    "final_url": "https://www.nj.gov/humanservices/dmahs/documents/about/NJFC-ABD-MLTSS-BRO-E-2026_Web.pdf",
+    "effective_date": "2026-04-10",
+    "effective_date_estimated": false,
+    "fetch_date": "2026-09-28",
+    "sha256": "f0f98b23a748b09586aaf7c516a3f0d1a886e0a13c3c129a44d237cca0a0dd5a",
+    "jurisdiction": "NJ",
+    "county": "all",
+    "audience": "consumer",
+    "year": 2026,
+    "http_last_modified": "2026-04-28",
+    "derived_from": "raw/nj_dmahs/nj_dmahs_mltss_application_guidance_2026.pdf",
+    "source_sha256": "f0f98b23a748b09586aaf7c516a3f0d1a886e0a13c3c129a44d237cca0a0dd5a",
+    "text_sha256": "ae9489db52a76b2a27fcc4c02c99e15d8ffc8b687637fede73592d721d55159d",
+    "extractor": "pymupdf4llm",
+    "extractor_version": "3",
+    "chars": 16269
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "metadataAttributes": {
+    "source_id": "nj_doas",
+    "publisher": "NJ DHS Division of Aging Services (DoAS)",
+    "program": "All DoAS programs",
+    "title": "NJ Division of Aging Services | 2026 Program Guide",
+    "kind": "pdf",
+    "source_url": "https://www.nj.gov/humanservices/doas/documents/DoAS%20Program%20Guide.pdf",
+    "final_url": "https://www.nj.gov/humanservices/doas/documents/DoAS%20Program%20Guide.pdf",
+    "effective_date": "2026-03-23",
+    "effective_date_estimated": false,
+    "fetch_date": "2026-09-28",
+    "sha256": "06f4e1515f5cfd7aced8098bd64adbd6c751859c42b087ea44fb3340d7c0a709",
+    "jurisdiction": "NJ",
+    "county": "all",
+    "audience": "consumer",
+    "year": 2026,
+    "http_last_modified": "2026-03-23",
+    "derived_from": "raw/nj_doas/nj_doas_program_guide.pdf",
+    "source_sha256": "06f4e1515f5cfd7aced8098bd64adbd6c751859c42b087ea44fb3340d7c0a709",
+    "text_sha256": "10f0cad0be37dd3ac901de8e66ff659440a9304884d8a18ab3d1932c17564222",
+    "extractor": "pymupdf4llm",
+    "extractor_version": "3",
+    "chars": 51856
+  }
+}

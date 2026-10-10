@@ -1,0 +1,52 @@
+{
+  "questions": [
+    {
+      "id": "daily_bathing",
+      "category": "Daily living",
+      "query": "My mother needs help showering. What kind of assistance might be available?",
+      "program": null
+    },
+    {
+      "id": "daily_meals",
+      "category": "Daily living",
+      "query": "Can a caregiver help prepare meals at home?",
+      "program": null
+    },
+    {
+      "id": "daily_medication",
+      "category": "Daily living",
+      "query": "What is the difference between medication reminders and administering medication?",
+      "program": null
+    },
+    {
+      "id": "dementia_wandering",
+      "category": "Dementia and safety",
+      "query": "My mother has dementia and sometimes wanders outside. What support is available?",
+      "program": null
+    },
+    {
+      "id": "caregiver_burnout",
+      "category": "Family caregiver",
+      "query": "My sister is exhausted from caregiving. Is short-term relief available?",
+      "program": null
+    },
+    {
+      "id": "schedule_weekends",
+      "category": "Scheduling",
+      "query": "Can we arrange a caregiver to come only on weekends?",
+      "program": null
+    },
+    {
+      "id": "cost_hidden",
+      "category": "Costs",
+      "query": "Are there cancellation fees, deposits, or other charges?",
+      "program": null
+    },
+    {
+      "id": "matching_language",
+      "category": "Caregiver preferences",
+      "query": "Do you have a caregiver who speaks Mandarin?",
+      "program": null
+    }
+  ]
+}

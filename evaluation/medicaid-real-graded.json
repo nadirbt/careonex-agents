@@ -1,0 +1,127 @@
+[
+  {
+    "query": "Does Medicaid cover help with bathing and dressing in New Jersey?",
+    "passages": [
+      {
+        "text": "New Jersey home-care program limits for 2026 (curated summary) > Related 2026 benefit programs (NJSave application, www.aging.nj.gov or 1-800-792-9745)\n\n- PAAD (prescription help): annual income under $54,943 individual or $62,390 couple; no resource limit;\n $5 generic / $7 brand copays. Age 65+, or 18 to 64 on Social Security Disability.\n- Senior Gold: annual income $54,943 to $64,943 individual or $62,390 to $72,390 couple.\n- Medicare Savings Programs: QMB annual income up to $15,960 individual / $21,640 couple; SLMB and QI up to\n $21,546 / $29,214; resources up to $9,950 / $14,910 for all three. QMB pays Part A and B premiums,\n deductibles and copays; SLMB and QI pay the Part B premium ($202.90 per month in 2026).\n- Lifeline utility assistance: $225 per year; same income limits as PAAD.\n- Hearing Aid Assistance (HAAAD): $500 reimbursement per device, up to $1,000 for two; same income limits as PAAD.",
+        "score": 0.6954352855682373,
+        "source_url": "curated/nj_doas_2026_program_limits.md",
+        "title": "NJ home-care program limits 2026 (curated summary)",
+        "program": "All DoAS programs",
+        "effective_date": "2026-03-01",
+        "heading_path": "New Jersey home-care program limits for 2026 (curated summary) > Related 2026 benefit programs (NJSave application, www.aging.nj.gov or 1-80",
+        "s3_key": "chunks/careonex_curated/nj_doas_2026_program_limits.md/0011-5b7b072b753e.md",
+        "table_verified": false,
+        "relevance": 0
+      },
+      {
+        "text": "New Jersey home-care program limits for 2026 (curated summary) > NJ FamilyCare / Medicaid Personal Care Assistant (PCA) benefit\n\n- Who: any age, enrolled in NJ FamilyCare (regular Medicaid; income about $1,330 per month and assets $4,000 for a\n single adult in 2026, higher limits for children and pregnant people). Does not require nursing-home level of care.\n- What: hours of hands-on help with daily activities at home from a licensed agency, authorized by a nurse\n assessment from the member's health plan (Horizon NJ Health, Aetna Better Health, UnitedHealthcare Community\n Plan, Wellpoint, or Fidelis Care) and reassessed yearly. The Personal Preference Program lets the member\n self-direct those hours and hire family.\n- Apply: call the member services number on the health plan card and ask for a PCA assessment.",
+        "score": 0.6922509670257568,
+        "source_url": "curated/nj_doas_2026_program_limits.md",
+        "title": "NJ home-care program limits 2026 (curated summary)",
+        "program": "All DoAS programs",
+        "effective_date": "2026-03-01",
+        "heading_path": "New Jersey home-care program limits for 2026 (curated summary) > NJ FamilyCare / Medicaid Personal Care Assistant (PCA) benefit",
+        "s3_key": "chunks/careonex_curated/nj_doas_2026_program_limits.md/0006-c889bb300eed.md",
+        "table_verified": false,
+        "relevance": 2
+      },
+      {
+        "text": "**Additional Assistance and Information**\n\nThis guidance is intended to answer the most frequently asked questions. It does not cover every situation. If you are not sure what to do, or if you have a question that does not appear on this list, you may:\n\n- <sup>Consult with an attorney who specializes</sup> in elder law or Medicaid planning;\n\n- <sup>Call the Health Care Access Project at</sup> Legal Services of New Jersey ( **1-888-576-5529** ); or\n\n- <sup>Use the following list to find free legal</sup> services available in your county: **www.nj.gov/basicneeds/legal-aid/ find-legal-aid.shtml** .\n\nYou may also reach out to your local CSSA if you would like to speak with someone on the phone or in person. To find your local CSSA, please visit the NJ FamilyCare website at **njfamilycare.dhs.state.nj.us/need_help. aspx** .\n\nMore information on the MLTSS program is available at the Division of Medical Assistance and Health Services website: **www.nj.gov/humanservices/dmahs/ home/mltss.html** .\n\nApril 2026",
+        "score": 0.6920843422412872,
+        "source_url": "https://www.nj.gov/humanservices/dmahs/documents/about/NJFC-ABD-MLTSS-BRO-E-2026_Web.pdf",
+        "title": "MLTSS Application Guidance",
+        "program": "NJ FamilyCare / Medicaid MLTSS",
+        "effective_date": "2026-04-10",
+        "heading_path": "**Additional Assistance and Information**",
+        "s3_key": "chunks/nj_dmahs/nj_dmahs_mltss_application_guidance_2026.pdf/0018-1ee6763ff774.md",
+        "table_verified": false,
+        "relevance": 0
+      },
+      {
+        "text": "New Jersey home-care program limits for 2026 (curated summary) > MLTSS (NJ FamilyCare / Medicaid Managed Long Term Services and Supports) 2026\n\n- Who: age 21 or older, needs nursing-home level of care (hands-on help with 3 or more daily activities, or\n cognitive deficits needing supervision with 3 or more).\n- Income limit 2026: $2,982 per month for a single applicant. Income above that requires a Qualified\n Income Trust (QIT). Couples both applying: $5,964 combined.\n- Resource (asset) limit 2026: $2,000 for a single applicant ($3,000 couple both applying). The home you\n live in and one vehicle do not count. A non-applicant spouse may keep up to $162,660 in 2026.\n- Look-back: 5 years of financial records; transfers for less than fair value cause a penalty period.\n- Simplified application (self-attestation of no transfers) possible if income is $1,330 per month or less in 2026.\n- Cost share: none for in-home services; patient-pay liability may apply in assisted living or a nursing facility.\n- Apply: online at the NJ FamilyCare application site or through the County Social Service Agency (CSSA);\n clinical screening through the Area Agency on Aging / ADRC at 1-877-222-3737.",
+        "score": 0.6834600269794464,
+        "source_url": "curated/nj_doas_2026_program_limits.md",
+        "title": "NJ home-care program limits 2026 (curated summary)",
+        "program": "All DoAS programs",
+        "effective_date": "2026-03-01",
+        "heading_path": "New Jersey home-care program limits for 2026 (curated summary) > MLTSS (NJ FamilyCare / Medicaid Managed Long Term Services and Supports) 20",
+        "s3_key": "chunks/careonex_curated/nj_doas_2026_program_limits.md/0003-0b558c0e3fbc.md",
+        "table_verified": false,
+        "relevance": 1
+      },
+      {
+        "text": "Table of Contents\n\n|NJSAVE BENEFITS............................................................................ 1|\n|---|\n|NJSave ....................................................................................................... 1|\n|Pharmaceutical Assistance to the Aged and Disabled<br>(PAAD) ...................................................................................................2|\n|Medicare Savings Programs (MSPs) .............................................2|\n|Senior Gold Prescription Discount Program ............................. 3|\n|Lifeline Utility and Tenants Assistance ....................................... 4|\n|Hearing Aid Assistance to the Aged and Disabled (HAAAD)<br>................................................................................................................. 4|\n|AIDS DRUG DISTRIBUTION PROGRAM (ADDP)...... 5|\n|GET HELP..................................................................................................7|\n|Area Agencies on Aging/Aging and Disability Resource<br>Connections (AAA/ADRCs)...........................................................7|\n|State Health Insurance Assistance Program (SHIP) ..............11|\n|Congregate Housing Services Program (CHSP) .....................11|\n|Managed Long Term Services and Supports (MLTSS) ........12|\n|Program of All-Inclusive Care for the Elderly (PACE) ...........14<br>i|\n|The Office of Community Choice Options (OCCO) .................15|\n|Clinical Eligibility for Long Term Services and Supports ...16|\n|Money Follows the Person (MFP, also known as I Choose<br>Home NJ) ............................................................................................17|\n|HELP FOR CAREGIVERS............................................................18|\n|Statewide Respite Care Program (SRCP) ..................................18|\n|Jersey Assistance for Community Caregiving (JACC) ..........19|\n|Adult Day Health Services (ADHS) ..............................................21|\n|Alzheimer’s Adult Day Services Program ...............................22|\n|Social Day Centers .............................................................................23|",
+        "score": 0.682781457901001,
+        "source_url": "https://www.nj.gov/humanservices/doas/documents/DoAS%20Program%20Guide.pdf",
+        "title": "NJ Division of Aging Services | 2026 Program Guide",
+        "program": "All DoAS programs",
+        "effective_date": "2026-03-23",
+        "heading_path": "Table of Contents",
+        "s3_key": "chunks/nj_doas/nj_doas_program_guide.pdf/0001-dd85c6a6429e.md",
+        "table_verified": false,
+        "relevance": 0
+      },
+      {
+        "text": "**How to Apply**\n\nMLTSS applications are processed by the County Social Service Agency (CSSA) of the county where you live. You can apply online or complete a paper application that can be mailed or submitted in person. A list of CSSA locations is on the NJ FamilyCare website at **njfamilycare.dhs.state.nj.us/need_help. aspx** .\n\nApplying online ( **dmahs-nj.my.site.com/ familycare/quickstart** ) is the fastest way to start the application process. You will be able to upload your documents at the end of the application. If you cannot upload your documents, you can bring them in person or mail them to the CSSA office after you submit the online application.\n\nYou can also fill out a paper application provided by the AAA or CSSA, or you can print a copy of the application form **www. nj.gov/humanservices/dmahs/clients/ medicaid/abd/** . You should keep a copy and a list of what you submit.\n\nWhen you apply, answer “Yes” to the question on the application that asks if you need “nursing home like” services and need assistance with daily activities, such as dressing, bathing, and mobility. This will make sure that your application is processed for MLTSS. You do not need to live in a nursing home to apply for MLTSS.\n\n**For more details, flip open here.**",
+        "score": 0.6756221055984497,
+        "source_url": "https://www.nj.gov/humanservices/dmahs/documents/about/NJFC-ABD-MLTSS-BRO-E-2026_Web.pdf",
+        "title": "MLTSS Application Guidance",
+        "program": "NJ FamilyCare / Medicaid MLTSS",
+        "effective_date": "2026-04-10",
+        "heading_path": "**How to Apply**",
+        "s3_key": "chunks/nj_dmahs/nj_dmahs_mltss_application_guidance_2026.pdf/0005-170b84d4da24.md",
+        "table_verified": false,
+        "relevance": 1
+      },
+      {
+        "text": "New Jersey home-care program limits for 2026 (curated summary) > Which programs apply at which age (check this before suggesting a program)\n\n- Under 18: NJ FamilyCare children's coverage and the Personal Care Assistant (PCA) benefit through the\n child's health plan; not JACC, not PACE, not Statewide Respite, not Medicare.\n- Age 18 and older: Statewide Respite Care Program (care recipient with a chronic disability and an unpaid\n caregiver); NJ FamilyCare / Medicaid PCA hours through the health plan if enrolled in Medicaid.\n- Age 21 and older: MLTSS (nursing-home level of care plus Medicaid financial limits).\n- Age 55 and older: PACE (must live in a PACE service area and need nursing-home level of care).\n- Age 60 and older: JACC and Older Americans Act services (meals, aide hours, respite through the county).\n- Age 65 and older, or under 65 with a qualifying disability: Medicare home health (short-term, skilled,\n homebound; not long-term custodial help), PAAD, Senior Gold, Medicare Savings Programs.\n- Any age with Alzheimer's disease or a related dementia and an unpaid caregiver: Alzheimer's Adult Day Services Program.\n- Any age, any income, caring for someone: the county ADRC at 1-877-222-3737 gives options counseling for free.\n- Veterans of any age: VA Homemaker and Home Health Aide care through VA health care; VA Aid and Attendance\n requires a VA pension (generally age 65 or older or permanently disabled).",
+        "score": 0.6744562089443207,
+        "source_url": "curated/nj_doas_2026_program_limits.md",
+        "title": "NJ home-care program limits 2026 (curated summary)",
+        "program": "All DoAS programs",
+        "effective_date": "2026-03-01",
+        "heading_path": "New Jersey home-care program limits for 2026 (curated summary) > Which programs apply at which age (check this before suggesting a program)",
+        "s3_key": "chunks/careonex_curated/nj_doas_2026_program_limits.md/0001-b6f388b07ca9.md",
+        "table_verified": false,
+        "relevance": 1
+      },
+      {
+        "text": "GET HELP > Managed Long Term Services and Supports (MLTSS) > DIVISION OF AGING SERVICES PROGRAM GUIDE | 2026\n\n- Respite\n\n- Care Management\n\n- Home and Vehicle Modifications\n\n- Home Delivered Meals\n\n- Personal Emergency Response Systems\n\n- Community Residential Services\n\n- Assisted Living\n\n- Nursing Home Care\n\nTo qualify for MLTSS, an individual must meet the following requirements:\n\n- New Jersey resident who is 65 or older, or under age 65 and determined blind or disabled by the Social Security Administration or the State of New Jersey.\n\n- US citizen or qualified noncitizen.\n\n- Require the level of care typically provided in a nursing home, which means help with activities of daily living, such as bathing, toileting, and mobility.\n\n- Financial requirements for NJ FamilyCare (NJ’s Medicaid program) with regards to monthly income and total liquid assets, and a five-year look back to ensure the guidelines for institutional Medicaid are also met.\n\n- For children birth through 20 years old, they must meet the special care nursing facility criteria, which includes medically complex skilled nursing services on a 24-hour basis.",
+        "score": 0.6732226312160492,
+        "source_url": "https://www.nj.gov/humanservices/doas/documents/DoAS%20Program%20Guide.pdf",
+        "title": "NJ Division of Aging Services | 2026 Program Guide",
+        "program": "All DoAS programs",
+        "effective_date": "2026-03-23",
+        "heading_path": "GET HELP > Managed Long Term Services and Supports (MLTSS) > DIVISION OF AGING SERVICES PROGRAM GUIDE | 2026",
+        "s3_key": "chunks/nj_doas/nj_doas_program_guide.pdf/0027-26fdaf3bb02e.md",
+        "table_verified": false,
+        "relevance": 1
+      },
+      {
+        "text": "New Jersey home-care program limits for 2026 (curated summary) > JACC (Jersey Assistance for Community Caregiving) 2026\n\n- Who: New Jersey resident age 60 or older, living at home (not a facility), nursing-home level of care,\n not enrolled in a Medicaid program.\n- Countable income limit 2026: $4,855 per month for an individual; $6,582 per month for a couple (365% of the federal poverty level).\n- Resource (asset) limit 2026: $40,000 individual; $60,000 couple.\n- Cost share: sliding scale based on income.\n- Service cap: up to $1,090 per month of services.\n- Services: care management, respite, home modifications, medical equipment and supplies, chore, personal\n emergency response system, attendant care, home-delivered meals, social adult day care, home-based\n supportive care, adult day health, transportation.\n- Apply: county Area Agency on Aging / ADRC, 1-877-222-3737. State funded; no federal Medicaid match.",
+        "score": 0.6727855503559113,
+        "source_url": "curated/nj_doas_2026_program_limits.md",
+        "title": "NJ home-care program limits 2026 (curated summary)",
+        "program": "All DoAS programs",
+        "effective_date": "2026-03-01",
+        "heading_path": "New Jersey home-care program limits for 2026 (curated summary) > JACC (Jersey Assistance for Community Caregiving) 2026",
+        "s3_key": "chunks/careonex_curated/nj_doas_2026_program_limits.md/0004-74147252db63.md",
+        "table_verified": false,
+        "relevance": 0
+      },
+      {
+        "text": "NJSAVE BENEFITS > NJSave\n\nThe Division of Aging Services uses NJSave, which is one application seniors and individuals with disabilities can use to get help paying Medicare premiums, prescription costs, and other living expenses. People can apply online or via a paper application. Both are available in English and Spanish.\n\nNJSave enrolls eligible applicants into the following programs:\n\n- Pharmaceutical Assistance to the Aged and Disabled (PAAD)\n\n- <mark>Medicare Savings Programs (QMB, SLMB, QI)</mark>\n\n- <mark>Senior Gold Prescription Discount Program</mark>\n\n- <mark>Lifeline Utility and Tenants Assistance</mark>\n\n- Hearing Aid Assistance to the Aged and Disabled (HAAAD)\n\nThe application is also used to screen individuals for numerous savings and assistance programs. If it looks like they may qualify, their data is forwarded for enrollment. These programs include:\n\n- Medicare Part D’s Low Income Subsidy (LIS, also known as “Extra Help”)\n\n- Universal Service Fund (USF)\n\n- Low Income Home Energy Assistance Program (LIHEAP)\n\n- Supplemental Nutrition Assistance Program (SNAP)\n\nFinally, individuals who qualify for PAAD _and_ Lifeline Utility Assistance through NJSave may also be eligible for:\n\n- Property Tax Freeze\n\n- Reduced Motor Vehicle Fees\n\n- Low-Cost Spaying/Neutering\n\n- New Jersey Hearing Aid Project (NJHAP)\n\nFor more information and to apply for our programs, see the detailed descriptions below, call us at 1-800-7929745, or visit our website at www.aging.nj.gov.",
+        "score": 0.6722238957881927,
+        "source_url": "https://www.nj.gov/humanservices/doas/documents/DoAS%20Program%20Guide.pdf",
+        "title": "NJ Division of Aging Services | 2026 Program Guide",
+        "program": "All DoAS programs",
+        "effective_date": "2026-03-23",
+        "heading_path": "NJSAVE BENEFITS > NJSave",
+        "s3_key": "chunks/nj_doas/nj_doas_program_guide.pdf/0003-27f4523e0a4b.md",
+        "table_verified": false,
+        "relevance": 0
+      }
+    ]
+  }
+]

@@ -1,0 +1,23 @@
+[project]
+name = "careonex-chunk"
+version = "0.1.0"
+description = "CareOneX chunk service: text/ Markdown -> section-aware chunks under chunks/"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = ["boto3>=1.35"]
+
+[project.scripts]
+careonex-chunk = "careonex_chunk.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8", "moto[s3,sts]>=5"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["careonex_chunk"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

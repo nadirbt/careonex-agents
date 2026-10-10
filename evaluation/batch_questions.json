@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "description": "25 synthetic caller questions for offline grading of real CareOneX AWS KB search results; no personally identifiable caller data.",
+  "questions": [
+    {
+      "id": "medicaid_bathing",
+      "query": "Does Medicaid cover help with bathing and dressing in New Jersey?",
+      "program": "Medicaid"
+    },
+    {
+      "id": "medicaid_eligibility",
+      "query": "My mother is 74 and needs help with daily activities. How can I tell if she qualifies for Medicaid home care in New Jersey?",
+      "program": "Medicaid"
+    },
+    {
+      "id": "medicaid_enrolled",
+      "query": "My father already has NJ FamilyCare. Can he get someone to help him shower at home?",
+      "program": "Medicaid"
+    },
+    {
+      "id": "medicaid_home_aide",
+      "query": "Can Medicaid send a home health aide to help my grandmother with meals and getting dressed?",
+      "program": "Medicaid"
+    },
+    {
+      "id": "medicaid_dementia",
+      "query": "My mother has dementia and cannot safely bathe alone. Can Medicaid help her stay at home?",
+      "program": "Medicaid"
+    },
+    {
+      "id": "medicaid_weekly_hours",
+      "query": "How does Medicaid determine how many hours of help with dressing and bathing are covered?",
+      "program": "Medicaid"
+    },
+    {
+      "id": "medicaid_caregiver",
+      "query": "Can Medicaid pay a family caregiver to help my elderly parent at home?",
+      "program": "Medicaid"
+    },
+    {
+      "id": "medicaid_apply",
+      "query": "Where do I start if I need Medicaid-funded home care for my mother?",
+      "program": "Medicaid"
+    },
+    {
+      "id": "medicaid_pca",
+      "query": "Does the NJ FamilyCare PCA benefit require nursing-home level of care?",
+      "program": "PCA"
+    },
+    {
+      "id": "medicaid_mltss",
+      "query": "Does MLTSS cover long-term assistance with daily living, and who assesses eligibility?",
+      "program": "MLTSS"
+    },
+    {
+      "id": "medicaid_assets",
+      "query": "What monthly income and asset limits apply to New Jersey Medicaid MLTSS for a single older adult in 2026?",
+      "program": "MLTSS"
+    },
+    {
+      "id": "medicaid_vs_medicare",
+      "query": "What is the difference between Medicaid home care and Medicare home health in New Jersey?",
+      "program": null
+    },
+    {
+      "id": "jacc_eligibility",
+      "query": "My aunt is 67 and not on Medicaid. Could she qualify for JACC home care support?",
+      "program": "JACC"
+    },
+    {
+      "id": "jacc_limits",
+      "query": "What are the 2026 income and asset limits for JACC in New Jersey?",
+      "program": "JACC"
+    },
+    {
+      "id": "jacc_apply",
+      "query": "How do I apply for the Jersey Assistance for Community Caregiving program?",
+      "program": "JACC"
+    },
+    {
+      "id": "pace_age_area",
+      "query": "My father is 58. Can he enroll in New Jersey PACE, and does location matter?",
+      "program": "PACE"
+    },
+    {
+      "id": "pace_services",
+      "query": "Does PACE offer personal care and transportation for older adults living at home?",
+      "program": "PACE"
+    },
+    {
+      "id": "medicare_bathing",
+      "query": "Will Medicare pay for an aide who only helps with bathing every morning?",
+      "program": "Medicare"
+    },
+    {
+      "id": "medicare_skilled",
+      "query": "What kind of skilled nursing or home health care does Medicare cover after hospitalization?",
+      "program": "Medicare"
+    },
+    {
+      "id": "medicare_vs_medicaid",
+      "query": "Does Medicare cover ongoing custodial care at home, or would Medicaid be a better program to investigate?",
+      "program": "Medicare"
+    },
+    {
+      "id": "respite_caregiver",
+      "query": "I care for my husband without pay. Is there a New Jersey program to give me temporary respite?",
+      "program": "SRCP"
+    },
+    {
+      "id": "respite_apply",
+      "query": "How do I apply for the Statewide Respite Care Program in New Jersey?",
+      "program": "SRCP"
+    },
+    {
+      "id": "adrc_phone",
+      "query": "Who can I call in New Jersey to learn about local home-care options even if I do not know the program?",
+      "program": "ADRC"
+    },
+    {
+      "id": "adrc_county",
+      "query": "Does the county Area Agency on Aging help families understand how to arrange home care?",
+      "program": "ADRC"
+    },
+    {
+      "id": "payment_options",
+      "query": "My mother needs help at home, but I am unsure whether Medicaid or private payment is appropriate. What options should I explore?",
+      "program": null
+    }
+  ]
+}

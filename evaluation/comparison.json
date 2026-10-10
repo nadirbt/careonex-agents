@@ -1,0 +1,149 @@
+{
+  "query": "Does Medicaid cover help with bathing and dressing in New Jersey?",
+  "candidates": 10,
+  "top_k": 3,
+  "label_note": "Provisional human relevance grades; this compares ranking in a fixed candidate pool, not KB recall or answer accuracy.",
+  "results": {
+    "bedrock_baseline": {
+      "metrics": {
+        "precision_at_k": 0.3333,
+        "recall_at_k": 0.2,
+        "mrr_at_k": 0.5,
+        "ndcg_at_k": 0.4582
+      },
+      "latency_seconds": 0.0,
+      "top": [
+        {
+          "rank": 1,
+          "candidate_index": 0,
+          "relevance_grade": 0,
+          "title": "New Jersey home-care program limits for 2026 (curated summary) > Related 2026 benefit programs (NJSave application, www.aging.nj.gov or 1-80",
+          "source": "chunks/careonex_curated/nj_doas_2026_program_limits.md/0011-5b7b072b753e.md",
+          "score": null
+        },
+        {
+          "rank": 2,
+          "candidate_index": 1,
+          "relevance_grade": 2,
+          "title": "New Jersey home-care program limits for 2026 (curated summary) > NJ FamilyCare / Medicaid Personal Care Assistant (PCA) benefit",
+          "source": "chunks/careonex_curated/nj_doas_2026_program_limits.md/0006-c889bb300eed.md",
+          "score": null
+        },
+        {
+          "rank": 3,
+          "candidate_index": 2,
+          "relevance_grade": 0,
+          "title": "**Additional Assistance and Information**",
+          "source": "chunks/nj_dmahs/nj_dmahs_mltss_application_guidance_2026.pdf/0018-1ee6763ff774.md",
+          "score": null
+        }
+      ]
+    },
+    "tfidf_blend_0.6": {
+      "metrics": {
+        "precision_at_k": 0.6667,
+        "recall_at_k": 0.4,
+        "mrr_at_k": 0.5,
+        "ndcg_at_k": 0.5792
+      },
+      "latency_seconds": 0.002,
+      "top": [
+        {
+          "rank": 1,
+          "candidate_index": 2,
+          "relevance_grade": 0,
+          "title": "**Additional Assistance and Information**",
+          "source": "chunks/nj_dmahs/nj_dmahs_mltss_application_guidance_2026.pdf/0018-1ee6763ff774.md",
+          "score": 0.173118
+        },
+        {
+          "rank": 2,
+          "candidate_index": 1,
+          "relevance_grade": 2,
+          "title": "New Jersey home-care program limits for 2026 (curated summary) > NJ FamilyCare / Medicaid Personal Care Assistant (PCA) benefit",
+          "source": "chunks/careonex_curated/nj_doas_2026_program_limits.md/0006-c889bb300eed.md",
+          "score": 0.134919
+        },
+        {
+          "rank": 3,
+          "candidate_index": 7,
+          "relevance_grade": 1,
+          "title": "GET HELP > Managed Long Term Services and Supports (MLTSS) > DIVISION OF AGING SERVICES PROGRAM GUIDE | 2026",
+          "source": "chunks/nj_doas/nj_doas_program_guide.pdf/0027-26fdaf3bb02e.md",
+          "score": 0.140257
+        }
+      ]
+    },
+    "titan_pure_cosine": {
+      "metrics": {
+        "precision_at_k": 0.3333,
+        "recall_at_k": 0.2,
+        "mrr_at_k": 0.5,
+        "ndcg_at_k": 0.4582
+      },
+      "latency_seconds": 3.696,
+      "top": [
+        {
+          "rank": 1,
+          "candidate_index": 0,
+          "relevance_grade": 0,
+          "title": "New Jersey home-care program limits for 2026 (curated summary) > Related 2026 benefit programs (NJSave application, www.aging.nj.gov or 1-80",
+          "source": "chunks/careonex_curated/nj_doas_2026_program_limits.md/0011-5b7b072b753e.md",
+          "score": 0.390871
+        },
+        {
+          "rank": 2,
+          "candidate_index": 1,
+          "relevance_grade": 2,
+          "title": "New Jersey home-care program limits for 2026 (curated summary) > NJ FamilyCare / Medicaid Personal Care Assistant (PCA) benefit",
+          "source": "chunks/careonex_curated/nj_doas_2026_program_limits.md/0006-c889bb300eed.md",
+          "score": 0.384427
+        },
+        {
+          "rank": 3,
+          "candidate_index": 2,
+          "relevance_grade": 0,
+          "title": "**Additional Assistance and Information**",
+          "source": "chunks/nj_dmahs/nj_dmahs_mltss_application_guidance_2026.pdf/0018-1ee6763ff774.md",
+          "score": 0.384158
+        }
+      ]
+    },
+    "titan_blend_0.6": {
+      "metrics": {
+        "precision_at_k": 0.3333,
+        "recall_at_k": 0.2,
+        "mrr_at_k": 0.5,
+        "ndcg_at_k": 0.4582
+      },
+      "latency_seconds": 3.696,
+      "top": [
+        {
+          "rank": 1,
+          "candidate_index": 0,
+          "relevance_grade": 0,
+          "title": "New Jersey home-care program limits for 2026 (curated summary) > Related 2026 benefit programs (NJSave application, www.aging.nj.gov or 1-80",
+          "source": "chunks/careonex_curated/nj_doas_2026_program_limits.md/0011-5b7b072b753e.md",
+          "score": 0.390871
+        },
+        {
+          "rank": 2,
+          "candidate_index": 1,
+          "relevance_grade": 2,
+          "title": "New Jersey home-care program limits for 2026 (curated summary) > NJ FamilyCare / Medicaid Personal Care Assistant (PCA) benefit",
+          "source": "chunks/careonex_curated/nj_doas_2026_program_limits.md/0006-c889bb300eed.md",
+          "score": 0.384427
+        },
+        {
+          "rank": 3,
+          "candidate_index": 2,
+          "relevance_grade": 0,
+          "title": "**Additional Assistance and Information**",
+          "source": "chunks/nj_dmahs/nj_dmahs_mltss_application_guidance_2026.pdf/0018-1ee6763ff774.md",
+          "score": 0.384158
+        }
+      ]
+    },
+    "bedrock_error": "AccessDeniedException: An error occurred (AccessDeniedException) when calling the Rerank operation: User: arn:aws:sts::117949645823:assumed-role/AWSReservedSSO_AC215_a0b0fcfe9529b8ab/mren@g.harvard.edu is not authorized to perform: bedrock:Rerank because no identity-based policy allows the bedrock:Rerank action"
+  }
+}

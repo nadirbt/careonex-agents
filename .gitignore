@@ -1,29 +1,44 @@
-# Python virtual environments
+# Local environments, compiled files, caches
 .venv/
 venv/
 env/
-# stray venvs from shell mistakes (folders containing pyvenv.cfg)
 pyvenv.cfg
-
-# Byte-compiled / caches
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.hypothesis/
 
-# Environment / secrets — never commit AWS keys
+# Secrets, user settings, OS/editor files
 .env
 .env.*
+!.env.example
 .aws/
 *.pem
-
-# OS / editor
+*.key
+TEAM_SETUP.private.md
+CLAUDE.md
 .DS_Store
-.python-version
+Thumbs.db
 .idea/
 .vscode/
 
-# Private team values (account id, portal URL, teammate e-mails)
-TEAM_SETUP.private.md
+# Private caller data and generated reports (not reference fixtures)
+/data/
+/services/voice/data/
+**/data/intakes/
+/voice-smoke*/
+/voice-text-evaluation.json
+/evaluation/batch_runs/
+/evaluation/batch_runs_to_review.zip
+/evaluation/*_result.json
+/evaluation/*_pilot.json
+/evaluation/*_full.json
+/evaluation/*_run.json
+
+# Temporary exports created when evaluating/staging knowledge bases
+/chunk_abc_export_ready/
+/chunk_abc_kbs/
+/chunk_abc_retrieval.json
+/chunk_abc_metrics.json
