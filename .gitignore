@@ -33,3 +33,7 @@ CLAUDE.md
 
 # Pipeline outputs (snapshot manifests, downloads). Anchored so services/data/ is NOT ignored.
 /data/
+
+# Voice intake records (caller PII)
+data/intakes/
+services/voice/data/
