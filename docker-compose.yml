@@ -1,4 +1,4 @@
-# One command runs the pipeline: `make run` (== docker compose up data ingest extract chunk kb-sync).
+# One command runs the pipeline: `just run` (== docker compose up data ingest extract chunk kb-sync).
 # Each service is its own container with its own Dockerfile + pyproject.toml (see CLAUDE.md).
 #
 # AWS credentials come from the host's ~/.aws (SSO profile). Run
@@ -69,7 +69,7 @@ services:
     <<: *mounts
     command: ["sync"]
 
-  # 6. Retrieval API (long-running). `make serve`.
+  # 6. Retrieval API (long-running). `just serve`.
   retrieve:
     build: ./services/retrieve
     image: careonex/retrieve:local
@@ -86,7 +86,7 @@ services:
       retries: 10
     command: ["serve"]
 
-  # 7. Voice smoke test: WAV question -> Nova 2 Sonic -> tool call -> spoken reply. `make smoke`.
+  # 7. Voice smoke test: WAV question -> Nova 2 Sonic -> tool call -> spoken reply. `just smoke`.
   voice:
     build: ./services/voice
     image: careonex/voice:local

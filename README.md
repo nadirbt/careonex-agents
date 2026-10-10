@@ -10,6 +10,7 @@ The mic stays open while Sonic talks. Built-in server barge-in stops generation 
 
 - Python 3.12 (managed by `uv`; the Bedrock SDK requires >= 3.12)
 - Docker Desktop (every component runs as a container)
+- [`just`](https://github.com/casey/just) as the task runner (`brew install just`; other platforms: https://just.systems/man/en/packages.html). Run `just` with no arguments to list every command
 - AWS credentials with Amazon Bedrock access (SigV4 — **not** a Bedrock API key)
 - An AWS account permitted to invoke **Nova 2 Sonic** in `us-east-1`
 - Headset recommended: speaker echo can look like a barge-in to the model
@@ -20,7 +21,7 @@ The mic stays open while Sonic talks. Built-in server barge-in stops generation 
 ## Layout
 
 Every component is a container under `services/` with its own `Dockerfile` and uv `pyproject.toml`;
-`docker-compose.yml` wires them and `make run` runs the data pipeline end to end:
+`docker-compose.yml` wires them and `just run` runs the data pipeline end to end:
 
 | Service | Does |
 | --- | --- |
@@ -32,13 +33,13 @@ Every component is a container under `services/` with its own `Dockerfile` and u
 | `voice` | this Nova 2 Sonic client; the container runs a mic-free smoke test with tool use |
 
 ```bash
-brew install portaudio awscli        # portaudio only for the laptop microphone client
+brew install just awscli portaudio   # just runs the recipes; portaudio only for the laptop microphone client
 aws sso login --profile careonex-team
 export AWS_PROFILE=careonex-team AWS_DEFAULT_REGION=us-east-1
-make build && make run               # pipeline
-make serve                           # retrieval API
-make smoke                           # voice round trip through the API
-make test                            # offline tests for all services
+just build && just run               # pipeline
+just serve                           # retrieval API
+just smoke                           # voice round trip through the API
+just test                            # offline tests for all services
 ```
 
 ## AWS credentials (local development)
@@ -83,7 +84,7 @@ Check **Billing → Credits** for available credits and expiry. After a short te
 ```bash
 cd services/voice
 uv sync --extra mic
-export CAREONEX_RETRIEVE_URL=http://localhost:8080   # after `make serve`
+export CAREONEX_RETRIEVE_URL=http://localhost:8080   # after `just serve`
 uv run careonex-voice
 ```
 

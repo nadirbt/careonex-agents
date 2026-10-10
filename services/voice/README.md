@@ -7,7 +7,7 @@ the model's `lookup_program_info` tool calls by asking the `retrieve` service fo
 Two ways to run:
 
 ```bash
-# Container: mic-free smoke test (what `make smoke` runs). Needs the retrieve service up for a real
+# Container: mic-free smoke test (what `just smoke` runs). Needs the retrieve service up for a real
 # tool round trip; without CAREONEX_RETRIEVE_URL the tool reports "knowledge base unavailable" and
 # the model promises a follow-up, which still proves the protocol.
 docker compose run --rm voice
