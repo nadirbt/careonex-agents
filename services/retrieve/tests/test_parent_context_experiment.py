@@ -11,7 +11,7 @@ from careonex_retrieve.retriever import retrieve
 
 
 RUN = 'chunk-abc-20261009-223721'
-BUCKET = 'ac215-program-kb-117949645823'
+BUCKET = 'ac215-program-kb-000000000000'
 PARENT_ID = '0123456789abcdef0123'
 CHILD_KEY = f'experiments/chunking/{RUN}/hierarchical/chunks/nj_doas/jacc.html/child1.md'
 PARENT_KEY = f'experiments/chunking/{RUN}/hierarchical/parents/nj_doas/jacc.html/{PARENT_ID}.md'

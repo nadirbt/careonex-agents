@@ -144,6 +144,6 @@
         }
       ]
     },
-    "bedrock_error": "AccessDeniedException: An error occurred (AccessDeniedException) when calling the Rerank operation: User: arn:aws:sts::117949645823:assumed-role/AWSReservedSSO_AC215_a0b0fcfe9529b8ab/mren@g.harvard.edu is not authorized to perform: bedrock:Rerank because no identity-based policy allows the bedrock:Rerank action"
+    "bedrock_error": "AccessDeniedException: An error occurred (AccessDeniedException) when calling the Rerank operation: User: arn:aws:sts::000000000000:assumed-role/AWSReservedSSO_AC215_a0b0fcfe9529b8ab/mren@g.harvard.edu is not authorized to perform: bedrock:Rerank because no identity-based policy allows the bedrock:Rerank action"
   }
 }

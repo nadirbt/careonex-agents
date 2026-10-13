@@ -350,7 +350,10 @@ def retrieve(runtime, kb_id: str, query: str, top_k: int = 5,
             for extra_run in runs[1:]:
                 admitted.append([p for p in extra_run if _passage_key(p) in baseline_keys
                                  or corroborates_original_question(query, p)])
-            passages = reciprocal_rank_fusion(admitted, weights=[1.5] + [1.0] * (len(admitted)-1)) if len(admitted) > 1 else original_run
+            # Equal weights let question-corroborated novel hits compete for the
+            # final top_k; a heavier original run would lock out every novel
+            # hit when enough original candidates are present.
+            passages = reciprocal_rank_fusion(admitted) if len(admitted) > 1 else original_run
     elif len(queries) == 1:
         passages = _fetch_one(runtime, kb_id, queries[0], n, effective_filter)
     else:

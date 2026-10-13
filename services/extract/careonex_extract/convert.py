@@ -13,7 +13,7 @@ from pathlib import Path
 
 from bs4 import Comment
 
-EXTRACTOR_VERSION = "5"  # v4: DoAS column verification; v5: Windows-safe PDF handling and cell-text fidelity
+EXTRACTOR_VERSION = "8"  # v8: strict-line detection tested on official four-page DoAS PDF
 
 
 def normalise(md: str) -> str:

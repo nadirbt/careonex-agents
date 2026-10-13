@@ -44,9 +44,70 @@ To collect evidence for feedback vs baseline using the previously created stagin
 ```powershell
 $env:AWS_PROFILE = "careonex-team"
 $env:AWS_DEFAULT_REGION = "us-east-1"
-uv run --python 3.12 --directory services/retrieve python "$PWD\evaluation\feedback_parent_experiment.py" collect --planner feedback --questions "$PWD\evaluation\universal_homecare_questions.json" --kb UYC7EK0ZDV --bucket ac215-program-kb-117949645823 --limit 5 --output "$PWD\evaluation\new_feedback_pilot.json"
+$env:CAREONEX_KB_ID = "<team-approved-staging-KB-ID>"
+$env:CAREONEX_KB_BUCKET = "<team-approved-staging-bucket>"
+uv run --python 3.12 --directory services/retrieve python "$PWD\evaluation\feedback_parent_experiment.py" collect --planner feedback --questions "$PWD\evaluation\universal_homecare_questions.json" --kb $env:CAREONEX_KB_ID --bucket $env:CAREONEX_KB_BUCKET --limit 5 --output "$PWD\evaluation\new_feedback_pilot.json"
 ```
 
 Use the correct staging KB and bucket for your AWS environment. `feedback` mode does not call Nova Lite. Do not commit fresh question transcripts or passages containing sensitive information. Review/grade relevance before making Precision, MRR, or NDCG claims.
 
 **Note:** the experimental `intent` planner invokes a text model and may be denied by your SSO policy. There is no need to enable it for the voice agent.
+
+## Before activating a live Knowledge Base
+
+**No production KB selection, re-ingestion, or deployment is done by this repository update.**
+Ask the team which existing KB is approved for each environment. In a retrieval-only
+session, explicitly set `CAREONEX_KB_ID` to the approved KB and check the returned
+`knowledge_base_id` for a test retrieval before using it in the voice agent.
+Do not run `make run` or `kb-sync` just to test feedback; those can rebuild data.
+
+## Automated blind grading of the saved 40-question feedback run (Bedrock; no human review)
+
+Run this from the repository root after AWS SSO login. This automatically
+judges each distinct question/passage pair (218 for the saved 40-question
+fixture), without revealing the baseline/feedback arm, rank, or score to the
+LLM. Identical passages within a question are graded once and given the same
+score for both arms. It computes Precision@5, MRR@5 and pooled NDCG@5 and
+writes both a JSON result and a Markdown comparison report. **No manual
+review step is required.**
+
+```powershell
+$env:AWS_PROFILE = "careonex-team"
+$env:AWS_DEFAULT_REGION = "us-east-1"
+aws sso login --profile careonex-team
+uv run --python 3.12 --directory services/retrieve python "$PWD\evaluation\auto_feedback_grading.py" --input "$PWD\evaluation\universal_homecare_v2_full_prior.json" --output "$PWD\evaluation\reviews\feedback_40_auto.json" --report "$PWD\evaluation\reviews\feedback_40_auto.md" --model-id amazon.nova-lite-v1:0 --confirm-model-calls
+```
+
+The chosen Bedrock model needs `bedrock:InvokeModel` permission and incurs AWS
+charges (218 small model calls for this historical fixture). The script
+**checkpoints every grade**: if Bedrock throttles or permissions fail, fix the
+cause and rerun the same command to resume without grading completed items.
+It fails closed on invalid model output and rejects checkpoints from a different
+source snapshot, model, or rubric. It never rebuilds or writes to the KB. The
+`evaluation/reviews/` folder is Git-ignored because its results may contain
+sensitive or licensed text.
+
+**Interpretation:** These are automated *LLM-judged* relevance estimates, not
+human-validated ground truth or proof of factual correctness. A grade >=1
+counts as relevant for Precision@5/MRR@5. The NDCG ideal is drawn only from
+the union of retrieved passages, not all possible documents. Results refer to
+the **saved historical retrieval run**, not newer retrieval/merge code; rerun
+`collect` with the current code to measure current retrieval quality.
+
+The prior offline `blind_feedback_grading.py export/score` workflow remains
+available for backward compatibility; it is **not needed** for this automated
+path. The script does not silently replace missing LLM grades with heuristics.
+
+## Official 2026 NJ DoAS table acceptance test (offline)
+
+The extractor can now handle split program headings and entirely empty table
+spacer columns. To verify **the actual government PDF** before ingestion,
+download its four-page March 2026 version locally and run:
+
+```powershell
+$env:CAREONEX_DOAS_PDF_PATH = "C:\path\to\DoAS Programs Side-by-Side (2026).pdf"
+uv run --python 3.12 --directory services/extract pytest -q tests/test_doas_tables.py
+```
+
+The official-document test skips if `CAREONEX_DOAS_PDF_PATH` is absent. A passing
+synthetic test by itself does **not** establish fidelity to the real PDF.

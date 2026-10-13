@@ -39,8 +39,8 @@ def arms(planner: str) -> tuple[str, str, str, str]:
 
 
 ARMS = arms("feedback")
-STAGING_KB = "UYC7EK0ZDV"   # unique, verified experiment KB; override explicitly if necessary
-STAGING_BUCKET = "ac215-program-kb-117949645823"
+STAGING_KB = os.environ.get("CAREONEX_KB_ID")
+STAGING_BUCKET = os.environ.get("CAREONEX_KB_BUCKET")
 
 
 def write_json(path: Path, obj: dict) -> None:
@@ -328,6 +328,8 @@ def main(argv=None):
     t.add_argument("--output",type=Path)
     args=parser.parse_args(argv)
     if args.cmd=="collect":
+        if not args.kb or not args.bucket:
+            parser.error("collect requires --kb and --bucket (or CAREONEX_KB_ID and CAREONEX_KB_BUCKET)")
         if args.limit is not None and args.limit<1:parser.error("--limit must be >=1")
         result=collect(load_questions(args.questions),args.kb,args.bucket,args.output,seed=args.seed_grades,
                        limit=args.limit,planner=args.planner)

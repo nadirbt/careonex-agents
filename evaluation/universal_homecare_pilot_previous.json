@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "kb_id": "UYC7EK0ZDV",
-  "bucket": "ac215-program-kb-117949645823",
+  "kb_id": "EXAMPLEKB1",
+  "bucket": "ac215-program-kb-000000000000",
   "top_k": 5,
   "planner": "feedback",
   "cases": [

@@ -42,3 +42,6 @@ Thumbs.db
 /chunk_abc_kbs/
 /chunk_abc_retrieval.json
 /chunk_abc_metrics.json
+
+# Blind human evaluation exports and locally collected grading results
+/evaluation/reviews/

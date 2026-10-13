@@ -43,7 +43,7 @@ aws sso login --profile careonex-team
 **Window 1 — retrieval in Docker** (uses an existing Knowledge Base; does not reindex):
 
 ```powershell
-$env:CAREONEX_KB_ID = "UYC7EK0ZDV"  # example staging KB; replace with your actual KB ID
+$env:CAREONEX_KB_ID = "<team-approved-existing-KB-ID>"  # do not copy a test fixture ID
 $env:HOME = $HOME
 docker compose up --build retrieve
 ```

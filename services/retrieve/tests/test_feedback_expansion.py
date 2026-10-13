@@ -192,3 +192,65 @@ def test_feedback_collector_runs_without_model_and_resumes(tmp_path, monkeypatch
     assert len(kb.queries)==before
     with pytest.raises(ValueError):
         module.collect(q,'STAGING','a-bucket',out,runtime=kb,s3=S3(),planner='intent')
+
+
+def test_feedback_admits_relevant_new_passage_into_top_five_with_ten_initial_hits(monkeypatch):
+    """An expansion must be able to add evidence, not only reorder originals."""
+    monkeypatch.setenv('CAREONEX_RETRIEVE_RERANK', 'none')
+    question = 'What is the difference between medication reminders and administering medication?'
+
+    class KB:
+        def __init__(self):
+            self.queries = []
+
+        def retrieve(self, **kwargs):
+            query = kwargs['retrievalQuery']['text']
+            self.queries.append(query)
+            if len(self.queries) == 1:
+                rows = [(f'original-{i}', 'Public assistance application and enrollment procedures')
+                        for i in range(10)]
+            else:
+                rows = [
+                    ('new-relevant', 'Medication reminders prompt a patient; administering medication means giving medicine directly.'),
+                    ('new-off-topic', 'Bank loans, deposits and investment market policies.'),
+                ]
+            return {'retrievalResults': [
+                {'content': {'text': text},
+                 'metadata': {'title': 'General information'},
+                 'location': {'s3Location': {'uri': 's3://bucket/' + key}}}
+                for key, text in rows]}
+
+    kb = KB()
+    result = retrieve(kb, 'STAGING', question, search_mode='feedback', top_k=5)
+    assert len(kb.queries) == 2
+    assert len(result.passages) == 5
+    assert 'new-relevant' in [p.s3_key for p in result.passages]
+    assert 'new-off-topic' not in [p.s3_key for p in result.passages]
+    assert result.passages[0].s3_key == 'original-0'  # baseline wins equal-score tie
+
+
+def test_feedback_shared_passages_keep_high_priority(monkeypatch):
+    """Passages confirmed by both searches still rank ahead of novel-only hits."""
+    monkeypatch.setenv('CAREONEX_RETRIEVE_RERANK', 'none')
+    question = 'What is the difference between medication reminders and administering medication?'
+
+    class KB:
+        def __init__(self):
+            self.calls = 0
+
+        def retrieve(self, **kwargs):
+            self.calls += 1
+            if self.calls == 1:
+                keys = [f'original-{i}' for i in range(10)]
+            else:
+                keys = ['original-0', 'novel-relevant']
+            return {'retrievalResults': [
+                {'content': {'text': 'Medication reminders and medication administration are different services'
+                                     if key == 'novel-relevant' else 'General service application information'},
+                 'metadata': {'title': 'General information'},
+                 'location': {'s3Location': {'uri': 's3://bucket/' + key}}}
+                for key in keys]}
+
+    result = retrieve(KB(), 'STAGING', question, search_mode='feedback', top_k=5)
+    assert result.passages[0].s3_key == 'original-0'
+    assert 'novel-relevant' in [p.s3_key for p in result.passages]
