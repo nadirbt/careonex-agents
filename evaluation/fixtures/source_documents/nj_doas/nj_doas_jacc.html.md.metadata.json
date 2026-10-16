@@ -1,0 +1,25 @@
+{
+  "metadataAttributes": {
+    "source_id": "nj_doas",
+    "publisher": "NJ DHS Division of Aging Services (DoAS)",
+    "program": "JACC",
+    "title": "Division of Aging Services | Jersey Assistance for Community Caregiving (JACC)",
+    "kind": "html",
+    "source_url": "https://www.nj.gov/humanservices/doas/services/a-k/jacc/",
+    "final_url": "https://www.nj.gov/humanservices/doas/services/a-k/jacc/",
+    "effective_date": "2026-09-28",
+    "effective_date_estimated": true,
+    "fetch_date": "2026-09-28",
+    "sha256": "c5befe69c01dc7dfb63efeadef8399fc70d935cba42d1ae3eff44f394e9cadbd",
+    "jurisdiction": "NJ",
+    "county": "all",
+    "audience": "consumer",
+    "year": 2026,
+    "derived_from": "raw/nj_doas/nj_doas_jacc.html",
+    "source_sha256": "5a635d32d6f63ae149d5a657288456bf5eb923c8d1c75a3adbffa3130aab1a06",
+    "text_sha256": "9e22ffaed4bc42042194d6469fed830200385117b556b671c782b8afde501c4a",
+    "extractor": "markdownify",
+    "extractor_version": "3",
+    "chars": 5059
+  }
+}

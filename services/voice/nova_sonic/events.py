@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 
 from nova_sonic.config import (
     ENDPOINTING_SENSITIVITY,
@@ -17,7 +18,7 @@ def session_start() -> str:
             "event": {
                 "sessionStart": {
                     "inferenceConfiguration": {
-                        "maxTokens": 1024,
+                        "maxTokens": int(os.environ.get("NOVA_SONIC_MAX_TOKENS", "256")),
                         "topP": 0.9,
                         "temperature": 0.7,
                     },

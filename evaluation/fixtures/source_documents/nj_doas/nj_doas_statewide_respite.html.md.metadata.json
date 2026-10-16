@@ -1,0 +1,25 @@
+{
+  "metadataAttributes": {
+    "source_id": "nj_doas",
+    "publisher": "NJ DHS Division of Aging Services (DoAS)",
+    "program": "Statewide Respite Care Program",
+    "title": "Division of Aging Services | Statewide Respite Care Program",
+    "kind": "html",
+    "source_url": "https://www.nj.gov/humanservices/doas/services/q-z/srcp/",
+    "final_url": "https://www.nj.gov/humanservices/doas/services/q-z/srcp/",
+    "effective_date": "2026-03-17",
+    "effective_date_estimated": false,
+    "fetch_date": "2026-09-28",
+    "sha256": "69f4ba4b12824c85f6d9e6621a138fcce910ced6b172dcd456c05427a606517d",
+    "jurisdiction": "NJ",
+    "county": "all",
+    "audience": "consumer",
+    "year": 2026,
+    "derived_from": "raw/nj_doas/nj_doas_statewide_respite.html",
+    "source_sha256": "5f7c99ea4bd253bba43416c9e6cc65627c97a0e94473f2800d060d395860b9bf",
+    "text_sha256": "2e0a5bf4808be21d59ff711c9e2a7da129395c4e6e21b3924e7658590eccd2dd",
+    "extractor": "markdownify",
+    "extractor_version": "3",
+    "chars": 4537
+  }
+}

@@ -10,14 +10,14 @@ import boto3
 REGION = os.environ.get("AWS_DEFAULT_REGION") or os.environ.get("AWS_REGION") or "us-east-1"
 DATA_DIR = os.environ.get("CAREONEX_DATA_DIR") or "data"
 
-CHUNKS_PREFIX = "chunks"
-CONFIG_KEY = "config/knowledge-base.json"  # written by kb-sync, read by retrieve
+CHUNKS_PREFIX = os.environ.get("CAREONEX_CHUNKS_PREFIX", "chunks")
+CONFIG_KEY = os.environ.get("CAREONEX_KB_CONFIG_KEY", "config/knowledge-base.json")  # separate key for staging
 
 EMBEDDING_MODEL_ID = os.environ.get("CAREONEX_EMBEDDING_MODEL_ID", "amazon.titan-embed-text-v2:0")
 EMBEDDING_DIMENSIONS = int(os.environ.get("CAREONEX_EMBEDDING_DIMENSIONS", "1024"))
 
 KB_NAME = os.environ.get("CAREONEX_KB_NAME", "ac215-program-kb")
-DATA_SOURCE_NAME = "chunks"
+DATA_SOURCE_NAME = os.environ.get("CAREONEX_KB_DATA_SOURCE_NAME", "chunks")
 INDEX_NAME = os.environ.get("CAREONEX_VECTOR_INDEX", "program-kb")
 
 

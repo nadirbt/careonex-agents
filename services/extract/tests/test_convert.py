@@ -110,3 +110,25 @@ def test_markdown_passes_through_normalised():
 
     md = to_markdown(b"# Limits 2026\r\n\r\n\r\n- JACC: $4,855  \n", "md", "x.md")
     assert md == "# Limits 2026\n\n- JACC: $4,855\n"
+
+
+def test_pdf_converter_uses_closed_temp_file_and_cleans_up(monkeypatch):
+    """Regression for locked NamedTemporaryFile handles on Windows."""
+    import sys
+    from pathlib import Path
+    from types import SimpleNamespace
+
+    opened_paths = []
+
+    def fake_to_markdown(path, *, show_progress=False):
+        file_path = Path(path)
+        opened_paths.append(file_path)
+        with file_path.open("rb") as handle:
+            assert handle.read() == b"sample-pdf-bytes"
+        assert not show_progress
+        return "# Test Heading\n\nSample paragraph."
+
+    monkeypatch.setitem(sys.modules, "pymupdf4llm", SimpleNamespace(to_markdown=fake_to_markdown))
+    assert pdf_to_markdown(b"sample-pdf-bytes") == "# Test Heading\n\nSample paragraph.\n"
+    assert len(opened_paths) == 1
+    assert not opened_paths[0].exists()  # TemporaryDirectory removed after use

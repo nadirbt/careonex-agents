@@ -1,0 +1,246 @@
+{
+  "version": 1,
+  "description": "Synthetic cross-topic factual home-care queries for retrieval-only human grading. They are NOT claims that the currently indexed documents contain answers. Queries outside KB coverage must be marked not answerable, not hallucinated.",
+  "questions": [
+    {
+      "id": "daily_bathing",
+      "category": "Daily living",
+      "query": "My mother needs help showering. What kind of assistance might be available?",
+      "program": null
+    },
+    {
+      "id": "daily_dressing",
+      "category": "Daily living",
+      "query": "My dad struggles to dress himself in the morning. Can home care help?",
+      "program": null
+    },
+    {
+      "id": "daily_meals",
+      "category": "Daily living",
+      "query": "Can a caregiver help prepare meals at home?",
+      "program": null
+    },
+    {
+      "id": "daily_mobility",
+      "category": "Daily living",
+      "query": "Can someone help my grandmother move around safely at home?",
+      "program": null
+    },
+    {
+      "id": "daily_medication",
+      "category": "Daily living",
+      "query": "What is the difference between medication reminders and administering medication?",
+      "program": null
+    },
+    {
+      "id": "daily_housekeeping",
+      "category": "Daily living",
+      "query": "Do home-care visits include light housekeeping and laundry?",
+      "program": null
+    },
+    {
+      "id": "companion_loneliness",
+      "category": "Companionship",
+      "query": "My father lives alone and feels lonely. What kind of companionship can he get?",
+      "program": null
+    },
+    {
+      "id": "companion_outings",
+      "category": "Companionship",
+      "query": "Could a caregiver accompany my mother to appointments or social activities?",
+      "program": null
+    },
+    {
+      "id": "dementia_wandering",
+      "category": "Dementia and safety",
+      "query": "My mother has dementia and sometimes wanders outside. What support is available?",
+      "program": null
+    },
+    {
+      "id": "dementia_sundowning",
+      "category": "Dementia and safety",
+      "query": "Dad becomes confused late in the day. Is there evening support for families?",
+      "program": null
+    },
+    {
+      "id": "dementia_supervision",
+      "category": "Dementia and safety",
+      "query": "Can someone supervise my grandmother when we are at work?",
+      "program": null
+    },
+    {
+      "id": "overnight_safety",
+      "category": "Dementia and safety",
+      "query": "What if my dad needs someone nearby overnight?",
+      "program": null
+    },
+    {
+      "id": "caregiver_break",
+      "category": "Family caregiver",
+      "query": "I care for my wife all day and need a break. What options are there?",
+      "program": null
+    },
+    {
+      "id": "caregiver_burnout",
+      "category": "Family caregiver",
+      "query": "My sister is exhausted from caregiving. Is short-term relief available?",
+      "program": null
+    },
+    {
+      "id": "caregiver_training",
+      "category": "Family caregiver",
+      "query": "Are there resources to help family members learn safe caregiving?",
+      "program": null
+    },
+    {
+      "id": "schedule_weekends",
+      "category": "Scheduling",
+      "query": "Can we arrange a caregiver to come only on weekends?",
+      "program": null
+    },
+    {
+      "id": "schedule_overnight",
+      "category": "Scheduling",
+      "query": "Is overnight care available and how is it different from live-in care?",
+      "program": null
+    },
+    {
+      "id": "schedule_shortvisit",
+      "category": "Scheduling",
+      "query": "Is a two-hour visit possible, or is there a minimum visit length?",
+      "program": null
+    },
+    {
+      "id": "schedule_lastminute",
+      "category": "Scheduling",
+      "query": "Can someone start tomorrow if our usual caregiver is sick?",
+      "program": null
+    },
+    {
+      "id": "cost_hourly",
+      "category": "Costs",
+      "query": "How much does an hour of home-care assistance cost in New Jersey?",
+      "program": null
+    },
+    {
+      "id": "cost_overnight",
+      "category": "Costs",
+      "query": "Would overnight home care be charged differently from daytime visits?",
+      "program": null
+    },
+    {
+      "id": "cost_hidden",
+      "category": "Costs",
+      "query": "Are there cancellation fees, deposits, or other charges?",
+      "program": null
+    },
+    {
+      "id": "payment_ltc",
+      "category": "Payment",
+      "query": "Can long-term care insurance pay for help with bathing at home?",
+      "program": null
+    },
+    {
+      "id": "payment_private",
+      "category": "Payment",
+      "query": "Can families pay privately if they do not qualify for public assistance?",
+      "program": null
+    },
+    {
+      "id": "payment_medicare",
+      "category": "Payment",
+      "query": "Does Medicare pay for ongoing help with dressing if no skilled care is needed?",
+      "program": null
+    },
+    {
+      "id": "matching_language",
+      "category": "Caregiver preferences",
+      "query": "Do you have a caregiver who speaks Mandarin?",
+      "program": null
+    },
+    {
+      "id": "matching_gender",
+      "category": "Caregiver preferences",
+      "query": "Can my mother request a female caregiver?",
+      "program": null
+    },
+    {
+      "id": "matching_continuity",
+      "category": "Caregiver preferences",
+      "query": "Can the same caregiver visit each week?",
+      "program": null
+    },
+    {
+      "id": "matching_training",
+      "category": "Caregiver preferences",
+      "query": "What training or background checks do caregivers have?",
+      "program": null
+    },
+    {
+      "id": "areas_bergen",
+      "category": "Service geography",
+      "query": "Is your home-care network available in Bergen County?",
+      "program": null
+    },
+    {
+      "id": "areas_philly",
+      "category": "Service geography",
+      "query": "Do you serve families in Philadelphia?",
+      "program": null
+    },
+    {
+      "id": "local_contact",
+      "category": "Service geography",
+      "query": "Who should I call to ask about care near my home in New Jersey?",
+      "program": null
+    },
+    {
+      "id": "resistance_to_help",
+      "category": "Family concerns",
+      "query": "My father refuses help from strangers. What options can our family consider?",
+      "program": null
+    },
+    {
+      "id": "after_hospital",
+      "category": "Transitions",
+      "query": "My mother is being discharged from the hospital. How might home care help?",
+      "program": null
+    },
+    {
+      "id": "complex_bilingual",
+      "category": "Mixed constraints",
+      "query": "I need weekend visits in Bergen County with someone who speaks Spanish, but not live-in care. What can I explore?",
+      "program": null
+    },
+    {
+      "id": "complex_nonmedicaid",
+      "category": "Mixed constraints",
+      "query": "My dad does not have Medicaid and needs a few hours of help with meals. What might be available?",
+      "program": null
+    },
+    {
+      "id": "ambiguous_help",
+      "category": "Ambiguous",
+      "query": "I need help for my mom, but I do not know what sort of care she needs.",
+      "program": null
+    },
+    {
+      "id": "unsupported_same_day",
+      "category": "Unverified business fact",
+      "query": "Can CareOneX guarantee that a caregiver will come to my house by 8 AM tomorrow?",
+      "program": null
+    },
+    {
+      "id": "unsupported_rate",
+      "category": "Unverified business fact",
+      "query": "What is CareOneX’s exact hourly price this Saturday?",
+      "program": null
+    },
+    {
+      "id": "unsupported_language",
+      "category": "Unverified business fact",
+      "query": "How many Mandarin-speaking caregivers does CareOneX currently have?",
+      "program": null
+    }
+  ]
+}

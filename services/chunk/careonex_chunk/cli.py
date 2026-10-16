@@ -28,7 +28,7 @@ def cmd_preview(args: argparse.Namespace) -> int:
     from careonex_chunk.chunker import chunk_markdown
 
     md = Path(args.path).read_text(encoding="utf-8")
-    for c in chunk_markdown(md, config.TARGET_CHARS, config.MAX_CHARS, config.MIN_CHARS):
+    for c in chunk_markdown(md, config.TARGET_CHARS, config.MAX_CHARS, config.MIN_CHARS, config.OVERLAP_CHARS):
         print(f"--- {c.chunk_id}  {c.chars} chars  [{' > '.join(c.heading_path)}]")
         print(c.text if args.full else c.text[:300].replace("\n", " ") + (" ..." if c.chars > 300 else ""))
     return 0

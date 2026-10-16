@@ -13,7 +13,7 @@ from pathlib import Path
 
 from bs4 import Comment
 
-EXTRACTOR_VERSION = "3"  # 1: trafilatura (dropped nj.gov eligibility); 2: markdownify (nav-first strip emptied nj.gov); 3: main-first, wrapper-safe
+EXTRACTOR_VERSION = "8"  # v8: strict-line detection tested on official four-page DoAS PDF
 
 
 def normalise(md: str) -> str:
@@ -83,16 +83,21 @@ def html_to_markdown(data: bytes, url: str | None = None) -> str:
 def pdf_to_markdown(data: bytes) -> str:
     import pymupdf4llm
 
-    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=True) as fh:
-        fh.write(data)
-        fh.flush()
-        md = pymupdf4llm.to_markdown(fh.name, show_progress=False)
+    # On Windows, another process cannot reopen a NamedTemporaryFile while its
+    # handle is still open. Close the file before asking PyMuPDF to read it.
+    with tempfile.TemporaryDirectory() as temp_dir:
+        pdf_path = Path(temp_dir) / "document.pdf"
+        pdf_path.write_bytes(data)
+        md = pymupdf4llm.to_markdown(str(pdf_path), show_progress=False)
     return normalise(md)
 
 
 def to_markdown(data: bytes, kind: str, file_name: str = "", url: str | None = None) -> str:
     k = (kind or Path(file_name).suffix.lstrip(".")).lower()
     if k == "pdf":
+        if Path(file_name).name == "nj_doas_programs_side_by_side_2026.pdf":
+            from careonex_extract.doas_tables import doas_side_by_side_to_markdown
+            return doas_side_by_side_to_markdown(data)
         return pdf_to_markdown(data)
     if k in ("html", "htm"):
         return html_to_markdown(data, url=url)

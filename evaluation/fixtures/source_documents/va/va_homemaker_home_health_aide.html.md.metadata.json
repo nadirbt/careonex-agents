@@ -1,0 +1,25 @@
+{
+  "metadataAttributes": {
+    "source_id": "va",
+    "publisher": "U.S. Department of Veterans Affairs (VA)",
+    "program": "VA Homemaker and Home Health Aide Care",
+    "title": "Homemaker and Home Health Aide Care - Geriatrics and Extended Care",
+    "kind": "html",
+    "source_url": "https://www.va.gov/geriatrics/pages/Homemaker_and_Home_Health_Aide_Care.asp",
+    "final_url": "https://www.va.gov/geriatrics/pages/Homemaker_and_Home_Health_Aide_Care.asp",
+    "effective_date": "2026-03-06",
+    "effective_date_estimated": false,
+    "fetch_date": "2026-09-28",
+    "sha256": "bebfea58434413a825cd26f20e04e0ee49308b4ae974d591b9fbe45660e689f9",
+    "jurisdiction": "US",
+    "county": "all",
+    "audience": "consumer",
+    "year": 2026,
+    "derived_from": "raw/va/va_homemaker_home_health_aide.html",
+    "source_sha256": "f8713604c17f2bc5fe6562c41823b15e534a8f96947579aa16081053219c087a",
+    "text_sha256": "c0e443ded02ea7ec9141d956aed70b31b269243e23ca24c3c5f907bfbba36c22",
+    "extractor": "markdownify",
+    "extractor_version": "3",
+    "chars": 3662
+  }
+}

@@ -12,7 +12,7 @@ inspection and for the Milestone 2 retrieval example.
 Chunking rules (`chunker.py`): headings start sections and the full heading path is prepended to
 every chunk; tables are never split (header row repeated if a table alone exceeds the cap);
 long sections split at paragraph then sentence boundaries toward `CAREONEX_CHUNK_TARGET_CHARS`
-(1600 ≈ 400 tokens, cap 2800); sections under 200 chars fold into their neighbour.
+(1600 ≈ 400 tokens, cap 2800); short sections keep their own heading and are never merged into a different program; optional prose overlap stays within the same heading.
 
 ```bash
 docker compose run --rm chunk run
@@ -25,3 +25,9 @@ Chunk sidecars are deliberately small (< 1024 bytes). Bedrock Knowledge Bases ig
 `failureReasons`. Hashes and provenance stay in S3 object metadata and in the `text/` sidecar.
 
 Bump `CHUNKER_VERSION` when the rules change so every document is re-chunked once.
+
+## Controlled A/B/C hierarchical chunking experiment
+
+A separate, safe `python -m careonex_chunk.experiment` workflow exports true original (v2),
+current section-safe (v3), and hierarchical child/parent chunks (experimental) without changing
+`careonex-chunk run`. See [`../../HIERARCHICAL_CHUNKING_EXPERIMENT.md`](../../HIERARCHICAL_CHUNKING_EXPERIMENT.md).

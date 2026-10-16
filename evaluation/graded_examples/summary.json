@@ -1,0 +1,116 @@
+{
+  "questions_in_manifest": 2,
+  "graded_questions": 2,
+  "ungraded_questions": 0,
+  "missing_files": 0,
+  "expanded_query_cases_in_manifest": 2,
+  "summary_all_graded": {
+    "baseline": {
+      "precision_at_k": 0.3333,
+      "recall_at_k": 0.2,
+      "mrr_at_k": 0.75,
+      "ndcg_at_k": 0.3073,
+      "mean_latency_ms": 1291,
+      "median_latency_ms": 1291.0,
+      "p95_latency_ms": 1361
+    },
+    "expanded": {
+      "precision_at_k": 0.6667,
+      "recall_at_k": 0.4,
+      "mrr_at_k": 1.0,
+      "ndcg_at_k": 0.5764,
+      "mean_latency_ms": 599,
+      "median_latency_ms": 599.0,
+      "p95_latency_ms": 608
+    }
+  },
+  "summary_expansion_triggered_only": {
+    "baseline": {
+      "precision_at_k": 0.3333,
+      "recall_at_k": 0.2,
+      "mrr_at_k": 0.75,
+      "ndcg_at_k": 0.3073,
+      "mean_latency_ms": 1291,
+      "median_latency_ms": 1291.0,
+      "p95_latency_ms": 1361
+    },
+    "expanded": {
+      "precision_at_k": 0.6667,
+      "recall_at_k": 0.4,
+      "mrr_at_k": 1.0,
+      "ndcg_at_k": 0.5764,
+      "mean_latency_ms": 599,
+      "median_latency_ms": 599.0,
+      "p95_latency_ms": 608
+    }
+  },
+  "cases": [
+    {
+      "id": "medicaid_bathing",
+      "status": "graded",
+      "candidates": 12,
+      "relevant_in_union": 5,
+      "expansion_triggered": true,
+      "metrics": {
+        "baseline": {
+          "precision_at_k": 0.3333,
+          "recall_at_k": 0.2,
+          "mrr_at_k": 0.5,
+          "ndcg_at_k": 0.4582,
+          "latency_ms": 1221,
+          "top_ids": [
+            "s3:chunks/careonex_curated/nj_doas_2026_program_limits.md/0011-5b7b072b753e.md",
+            "s3:chunks/careonex_curated/nj_doas_2026_program_limits.md/0006-c889bb300eed.md",
+            "s3:chunks/nj_dmahs/nj_dmahs_mltss_application_guidance_2026.pdf/0018-1ee6763ff774.md"
+          ]
+        },
+        "expanded": {
+          "precision_at_k": 0.6667,
+          "recall_at_k": 0.4,
+          "mrr_at_k": 1.0,
+          "ndcg_at_k": 0.7003,
+          "latency_ms": 590,
+          "top_ids": [
+            "s3:chunks/careonex_curated/nj_doas_2026_program_limits.md/0003-0b558c0e3fbc.md",
+            "s3:chunks/careonex_curated/nj_doas_2026_program_limits.md/0006-c889bb300eed.md",
+            "s3:chunks/careonex_curated/nj_doas_2026_program_limits.md/0011-5b7b072b753e.md"
+          ]
+        }
+      }
+    },
+    {
+      "id": "medicaid_eligibility",
+      "status": "graded",
+      "candidates": 12,
+      "relevant_in_union": 5,
+      "expansion_triggered": true,
+      "metrics": {
+        "baseline": {
+          "precision_at_k": 0.3333,
+          "recall_at_k": 0.2,
+          "mrr_at_k": 1.0,
+          "ndcg_at_k": 0.1564,
+          "latency_ms": 1361,
+          "top_ids": [
+            "s3:chunks/careonex_curated/nj_doas_2026_program_limits.md/0001-b6f388b07ca9.md",
+            "s3:chunks/careonex_curated/nj_doas_2026_program_limits.md/0002-8055ca832e42.md",
+            "s3:chunks/careonex_curated/nj_doas_2026_program_limits.md/0010-721e0b5cb756.md"
+          ]
+        },
+        "expanded": {
+          "precision_at_k": 0.6667,
+          "recall_at_k": 0.4,
+          "mrr_at_k": 1.0,
+          "ndcg_at_k": 0.4525,
+          "latency_ms": 608,
+          "top_ids": [
+            "s3:chunks/careonex_curated/nj_doas_2026_program_limits.md/0001-b6f388b07ca9.md",
+            "s3:chunks/careonex_curated/nj_doas_2026_program_limits.md/0003-0b558c0e3fbc.md",
+            "s3:chunks/careonex_curated/nj_doas_2026_program_limits.md/0002-8055ca832e42.md"
+          ]
+        }
+      }
+    }
+  ],
+  "note": "Macro averages only include completely graded cases. Recall@k denominator is the judged candidate union per query (not all relevant passages in the KB). Scores evaluate retrieval rankings, not factual correctness of generated answers. Latency comes from single observations per query/mode and is not a robust speed benchmark."
+}

@@ -10,6 +10,7 @@ import logging
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
+from typing import Literal
 
 from careonex_retrieve import config
 from careonex_retrieve.retriever import build_filter, retrieve
@@ -34,6 +35,8 @@ class RetrieveRequest(BaseModel):
     source_id: str | None = None
     top_k: int = Field(default=config.DEFAULT_TOP_K, ge=1, le=20)
     latest_only: bool = True  # withhold older-year figures for a program when a newer year exists
+    search_mode: Literal["baseline", "expanded", "intent", "feedback"] | None = None
+    include_parent_context: bool = False  # staging-only: requires explicit KB allowlist
 
 
 @app.get("/health")
@@ -47,5 +50,10 @@ def post_retrieve(req: RetrieveRequest) -> dict:
         kb_id = config.knowledge_base_id()
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(status_code=503, detail=f"knowledge base not available: {exc}") from exc
+    if req.include_parent_context:
+        import os
+        if not os.environ.get("CAREONEX_PARENT_CONTEXT_KB_ID") or kb_id != os.environ["CAREONEX_PARENT_CONTEXT_KB_ID"]:
+            raise HTTPException(status_code=400, detail="parent context requires staging KB opt-in")
     flt = build_filter(req.program, req.year, req.jurisdiction, req.source_id)
-    return retrieve(runtime(), kb_id, req.query, req.top_k, flt, latest_only=req.latest_only).as_dict()
+    return retrieve(runtime(), kb_id, req.query, req.top_k, flt, latest_only=req.latest_only, search_mode=req.search_mode, program_hint=req.program,
+                    include_parent_context=req.include_parent_context).as_dict()

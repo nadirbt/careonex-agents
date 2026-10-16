@@ -1,0 +1,26 @@
+{
+  "metadataAttributes": {
+    "source_id": "nj_doas",
+    "publisher": "NJ DHS Division of Aging Services (DoAS)",
+    "program": "PACE",
+    "title": "Program of All-Inclusive Care for the Elderly (PACE) in New Jersey: Can it Work for You?",
+    "kind": "pdf",
+    "source_url": "https://www.nj.gov/humanservices/doas/documents/PACE%20Flyer%20(English).pdf",
+    "final_url": "https://www.nj.gov/humanservices/doas/documents/PACE%20Flyer%20(English).pdf",
+    "effective_date": "2026-06-10",
+    "effective_date_estimated": false,
+    "fetch_date": "2026-09-28",
+    "sha256": "eec274554edadf4e1f57417c682589d92f083a092e30fa3b4b91f5c439ae8991",
+    "jurisdiction": "NJ",
+    "county": "all",
+    "audience": "consumer",
+    "year": 2026,
+    "http_last_modified": "2026-06-10",
+    "derived_from": "raw/nj_doas/nj_doas_pace_flyer_en.pdf",
+    "source_sha256": "eec274554edadf4e1f57417c682589d92f083a092e30fa3b4b91f5c439ae8991",
+    "text_sha256": "bf0c05a6fbef5d8654aef1b060e454b692432b617271965c85a4f09cd3514110",
+    "extractor": "pymupdf4llm",
+    "extractor_version": "3",
+    "chars": 4539
+  }
+}

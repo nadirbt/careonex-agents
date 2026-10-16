@@ -1,0 +1,25 @@
+{
+  "metadataAttributes": {
+    "source_id": "va",
+    "publisher": "U.S. Department of Veterans Affairs (VA)",
+    "program": "VA Aid and Attendance / Housebound",
+    "title": "Aid And Attendance Benefits And Housebound Allowance | Veterans Affairs",
+    "kind": "html",
+    "source_url": "https://www.va.gov/pension/aid-attendance-housebound/",
+    "final_url": "https://www.va.gov/pension/aid-attendance-housebound/",
+    "effective_date": "2026-05-08",
+    "effective_date_estimated": false,
+    "fetch_date": "2026-09-28",
+    "sha256": "70ba447fc44e7ea52a6027384d66c9881a6694b3d9508f10631f3adcfa30ab0f",
+    "jurisdiction": "US",
+    "county": "all",
+    "audience": "consumer",
+    "year": 2026,
+    "derived_from": "raw/va/va_aid_attendance_housebound.html",
+    "source_sha256": "edf296169116f7fe2954b83c5f2a9c2c77ee9fb9ce61b26731407f0400947603",
+    "text_sha256": "10775afce945ee23407746cbe5276dc7b77a04f1cdce288fd822e879a201802a",
+    "extractor": "markdownify",
+    "extractor_version": "3",
+    "chars": 2538
+  }
+}

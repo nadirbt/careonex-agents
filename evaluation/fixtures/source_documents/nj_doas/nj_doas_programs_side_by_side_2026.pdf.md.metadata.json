@@ -1,0 +1,27 @@
+{
+  "metadataAttributes": {
+    "source_id": "nj_doas",
+    "publisher": "NJ DHS Division of Aging Services (DoAS)",
+    "program": "All DoAS programs",
+    "title": "DoAS Programs Side-by-Side (2026)",
+    "kind": "pdf",
+    "source_url": "https://www.nj.gov/humanservices/doas/documents/DoAS%20Programs%20Side-by-Side%20(2026).pdf",
+    "final_url": "https://www.nj.gov/humanservices/doas/documents/DoAS%20Programs%20Side-by-Side%20(2026).pdf",
+    "effective_date": "2026-03-01",
+    "effective_date_estimated": false,
+    "fetch_date": "2026-10-04",
+    "sha256": "109cf5938ba904b02ba44e343a24697849ecc619569886eed8268a745488b25b",
+    "jurisdiction": "NJ",
+    "county": "all",
+    "audience": "consumer",
+    "year": 2026,
+    "http_last_modified": "2026-03-26",
+    "note": "one-page table of 2026 income/asset limits for MLTSS, JACC, SRCP, AADSP, CHSP, OAA; supersedes figures in the Program Guide",
+    "derived_from": "raw/nj_doas/nj_doas_programs_side_by_side_2026.pdf",
+    "source_sha256": "109cf5938ba904b02ba44e343a24697849ecc619569886eed8268a745488b25b",
+    "text_sha256": "167659aa63d917a3d50082bac4ac53ccc166f5df96e7d06889d5b665a6bc8251",
+    "extractor": "pymupdf4llm",
+    "extractor_version": "3",
+    "chars": 14346
+  }
+}

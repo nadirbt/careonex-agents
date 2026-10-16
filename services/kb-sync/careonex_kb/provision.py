@@ -176,6 +176,12 @@ def _wait(get_status, ok: set[str], bad: set[str], what: str, timeout_s: int = 6
 # --- Orchestration ---------------------------------------------------------------------------
 
 def sync(sess, wait: bool = True, skip_ingest: bool = False) -> KBState:
+    if config.CHUNKS_PREFIX != "chunks":
+        if (config.CONFIG_KEY == "config/knowledge-base.json"
+                or config.KB_NAME == "ac215-program-kb"
+                or config.INDEX_NAME == "program-kb"
+                or not config.CHUNKS_PREFIX.startswith("experiments/chunking/")):
+            raise ValueError("staging KB must use distinct KB name, vector index, config key and experimental chunks prefix")
     s3 = sess.client("s3")
     s3v = sess.client("s3vectors")
     agent = sess.client("bedrock-agent")

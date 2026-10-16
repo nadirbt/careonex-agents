@@ -7,7 +7,7 @@ the model's `lookup_program_info` tool calls by asking the `retrieve` service fo
 Two ways to run:
 
 ```bash
-# Container: mic-free smoke test (what `just smoke` runs). Needs the retrieve service up for a real
+# Container: mic-free smoke test (what `make smoke` runs). Needs the retrieve service up for a real
 # tool round trip; without CAREONEX_RETRIEVE_URL the tool reports "knowledge base unavailable" and
 # the model promises a follow-up, which still proves the protocol.
 docker compose run --rm voice
@@ -33,3 +33,26 @@ test; `fixtures/question.wav` a 16 kHz synthesized question about Medicaid payin
 
 The smoke test writes `data/voice-smoke.json` (transcripts, tool calls, reply length) and
 `data/voice-smoke-reply.wav`.
+
+## Language switching and clarification
+
+A caller can ask to switch to another language using `set_conversation_language`. The app does not impose a fixed language allowlist; recognition and spoken output in any requested language depend on the capabilities of Nova 2 Sonic and must be verified live. Some languages may be experimental or unreliable.
+
+Intake is intended to proceed one question at a time. The agent should answer a caller's clarification or eligibility question before returning to intake; the `intake_next_question` and `save_intake` tools validate important fields and callback confirmation. Prompting is not a guarantee of model behavior; confirm with live conversations.
+
+## Model-free query expansion for voice lookups
+
+Voice `lookup_program_info` now requests `search_mode=feedback` by default.
+It searches the original question first, optionally makes up to two relevant
+heading-derived extra queries, and merges results with RRF. No Nova Lite
+permission is needed. To switch the **voice** back to single-query search,
+set `CAREONEX_VOICE_SEARCH_MODE=baseline` before starting the process.
+See [`../../docs/EVALUATION.md`](../../docs/EVALUATION.md) for how to evaluate retrieval modes.
+
+## Where does call data go?
+
+- A normal call does not automatically generate a permanent transcript or intake.
+- When a caller explicitly requests a callback and confirms their ten-digit phone number, `save_intake` persists JSON locally under `services/voice/data/intakes/` (or `CAREONEX_INTAKE_DIR`). The console prints the exact absolute filename.
+- On exit, the microphone client prints the count of confirmed saves and whether a save request was rejected. If it says `No save_intake tool call occurred`, the agent did not finish a confirmed callback intake.
+- For synthetic debugging only, set `CAREONEX_EVAL_REPORT` to an absolute JSON filename before launching the voice client. This opt-in saves transcripts and tool results after the call; it can include names and phone numbers. Never commit it.
+- Local records are *not* pushed to GitHub and there is no coordinator/database integration yet. A repository ZIP has no saved caller records, by design.

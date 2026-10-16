@@ -163,8 +163,8 @@ def main(argv: list[str] | None = None) -> None:
         if code in ("AccessDenied", "AccessDeniedException", "UnauthorizedOperation"):
             print(
                 f"AccessDenied: {exc}\n"
-                "The AC215 permission set only allows Nova Sonic. Bucket work needs the AC215-Data permission set "
-                "(see services/data/README.md).",
+                "Check the current AC215 permission set's S3 statement in TEAM_SETUP.md; "
+                "ask the team owner to confirm account permissions before changing resources.",
                 file=sys.stderr,
             )
             sys.exit(5)

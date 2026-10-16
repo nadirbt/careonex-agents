@@ -1,0 +1,25 @@
+{
+  "metadataAttributes": {
+    "source_id": "nj_dmahs",
+    "publisher": "NJ DHS Division of Medical Assistance and Health Services (DMAHS)",
+    "program": "NJ FamilyCare / Medicaid MLTSS",
+    "title": "Managed Long Term Services and Supports (MLTSS) | Division of Medical Assistance and Health Services",
+    "kind": "html",
+    "source_url": "https://www.nj.gov/humanservices/dmahs/individuals-families/familycare/mltss/",
+    "final_url": "https://www.nj.gov/humanservices/dmahs/individuals-families/familycare/mltss/",
+    "effective_date": "2026-05-08",
+    "effective_date_estimated": false,
+    "fetch_date": "2026-09-28",
+    "sha256": "754f8b42781dcb4198de6736cbe13c4cfaa604065de3de77636edc872cd9d7e4",
+    "jurisdiction": "NJ",
+    "county": "all",
+    "audience": "consumer",
+    "year": 2026,
+    "derived_from": "raw/nj_dmahs/nj_dmahs_mltss_overview.html",
+    "source_sha256": "c8e0ed53459d1280c31d1bbfd4bc6db10dd6b07f09db136a078197b5d5a9f9d9",
+    "text_sha256": "d5dd0c47a5ed8cb50731a138032dd171d06920deef8a84b33622bf01c4b872b9",
+    "extractor": "markdownify",
+    "extractor_version": "3",
+    "chars": 7807
+  }
+}

@@ -52,6 +52,8 @@ def test_lookup_calls_retrieve_and_trims(monkeypatch):
 
 
 def test_passages_sorted_newest_first_and_titles_speakable(monkeypatch):
+    # Check the historical ordering under explicit baseline rollback.
+    monkeypatch.setenv("CAREONEX_VOICE_SEARCH_MODE", "baseline")
     import nova_sonic.tools as t
 
     monkeypatch.setattr(t, "RETRIEVE_URL", "http://retrieve:8080")
@@ -91,10 +93,12 @@ def test_prompt_start_lists_both_tools():
     from nova_sonic.tools import TOOLS
 
     names = [t["toolSpec"]["name"] for t in json.loads(events.prompt_start("p", TOOLS))["event"]["promptStart"]["toolConfiguration"]["tools"]]
-    assert names == ["lookup_program_info", "intake_next_question", "save_intake"]
+    assert names == ["lookup_program_info", "intake_next_question", "save_intake", "set_conversation_language"]
 
 
 def test_lookup_passes_caller_facts_into_query_and_guidance(monkeypatch):
+    # Check the historical ordering under explicit baseline rollback.
+    monkeypatch.setenv("CAREONEX_VOICE_SEARCH_MODE", "baseline")
     import nova_sonic.tools as t
 
     monkeypatch.setattr(t, "RETRIEVE_URL", "http://retrieve:8080")
@@ -102,16 +106,14 @@ def test_lookup_passes_caller_facts_into_query_and_guidance(monkeypatch):
 
     def fake_post(url, payload, timeout):
         calls.append(payload)
-        if "55 year old" in payload["query"]:
-            return {"latency_ms": 5, "passages": [{"text": "Age 55 and older: PACE ...", "title": "curated", "s3_key": "chunks/c/age.md", "effective_date": "2026-03-01"}]}
         return {"latency_ms": 7, "passages": [{"text": "Medicare pays ...", "title": "10969", "s3_key": "chunks/m/1.md", "effective_date": "2025-06-24"},
                                               {"text": "Age 55 and older: PACE ...", "title": "curated", "s3_key": "chunks/c/age.md", "effective_date": "2026-03-01"}]}
 
     monkeypatch.setattr(t, "_post_json", fake_post)
     out = lookup_program_info_sync({"query": "how to pay for home care", "age": "55", "situation": "has no Medicaid", "county": "Bergen"})
-    assert len(calls) == 2 and "person aged 55" in calls[0]["query"] and "Bergen County" in calls[0]["query"]
-    assert "55 year old" in calls[1]["query"]
-    assert len(out["passages"]) == 2  # duplicate age chunk removed
+    assert len(calls) == 1 and "person aged 55" in calls[0]["query"] and "Bergen County" in calls[0]["query"]
+    assert calls[0]["top_k"] == 5  # age refines the requested search; it must not trigger another broad lookup
+    assert len(out["passages"]) == 2
     assert out["passages"][0]["text"].startswith("Age 55")  # newest first
     assert "Caller facts to check against: person aged 55" in out["guidance"] and "JACC starts" in out["guidance"]
 
@@ -120,16 +122,18 @@ def test_intake_next_question_returns_exactly_one_question_in_order():
     from nova_sonic.tools import INTAKE_ORDER, intake_next_question_sync
 
     first = intake_next_question_sync({})
-    assert first["field"] == "relationship" and first["remaining"] == len(INTAKE_ORDER)
+    assert first["field"] == "kind_of_help" and first["remaining"] == len(INTAKE_ORDER)
     assert first["ask"].count("?") == 1
 
     later = intake_next_question_sync({"relationship": "daughter", "care_recipient_age": "55", "county": "Hudson"})
-    assert later["field"] == "kind_of_help" and later["remaining"] == len(INTAKE_ORDER) - 3
+    assert later["field"] == "kind_of_help" and later["remaining"] == len(INTAKE_ORDER) - 2
 
-    done = intake_next_question_sync({f: "x" for f, _ in INTAKE_ORDER})
+    valid = {f: "x" for f, _ in INTAKE_ORDER}
+    valid["county"] = "Monmouth"
+    done = intake_next_question_sync(valid)
     assert done["complete"] is True and "save_intake" in done["guidance"]
 
 
 def test_intake_next_question_via_handle_tool_skips_known_fields():
     out = json.loads(asyncio.run(handle_tool("intake_next_question", json.dumps({"care_recipient_age": "77", "relationship": "son"}))))
-    assert out["field"] == "county"
+    assert out["field"] == "kind_of_help"

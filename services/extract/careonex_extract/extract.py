@@ -135,6 +135,9 @@ def extract_all(
             if not item.raw_sha256:
                 item.raw_sha256 = hashlib.sha256(data).hexdigest()
             md = to_markdown(data, attrs.get("kind", ""), raw_key, url=attrs.get("final_url") or attrs.get("source_url"))
+            # Only the geometry-verified six-column DoAS converter may assert this.
+            if Path(raw_key).name == "nj_doas_programs_side_by_side_2026.pdf":
+                attrs["table_verified"] = True
             item.text_sha256 = hashlib.sha256(md.encode("utf-8")).hexdigest()
             item.chars = len(md)
             item.text_changed = item.previous_text_sha256 is not None and item.previous_text_sha256 != item.text_sha256

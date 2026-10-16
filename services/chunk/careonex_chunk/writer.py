@@ -16,7 +16,7 @@ from pathlib import Path
 from botocore.exceptions import ClientError
 
 from careonex_chunk.chunker import CHUNKER_VERSION, Chunk, chunk_markdown
-from careonex_chunk.config import CHUNKS_PREFIX, MAX_CHARS, MIN_CHARS, SIDECAR_SUFFIX, SNAPSHOT_PREFIX, TARGET_CHARS, TEXT_PREFIX
+from careonex_chunk.config import CHUNKS_PREFIX, MAX_CHARS, MIN_CHARS, SIDECAR_SUFFIX, SNAPSHOT_PREFIX, TARGET_CHARS, TEXT_PREFIX, OVERLAP_CHARS
 
 log = logging.getLogger(__name__)
 
@@ -105,6 +105,7 @@ def sidecar_for(chunk: Chunk, doc_attrs: dict, text_key: str, total: int) -> dic
         "year": pick("year"),
         "jurisdiction": pick("jurisdiction"),
         "kind": pick("kind"),
+        "table_verified": pick("table_verified"),
         "heading_path": " > ".join(chunk.heading_path)[:140],
         "chunk_order": chunk.order,
         "chunk_count": total,
@@ -161,7 +162,7 @@ def chunk_all(
                 doc_attrs = json.loads(s3.get_object(Bucket=bucket, Key=text_key + SIDECAR_SUFFIX)["Body"].read())["metadataAttributes"]
             except ClientError:
                 doc_attrs = {}
-            chunks = chunk_markdown(md, TARGET_CHARS, MAX_CHARS, MIN_CHARS)
+            chunks = chunk_markdown(md, TARGET_CHARS, MAX_CHARS, MIN_CHARS, OVERLAP_CHARS)
             res.chunks = len(chunks)
             wanted = {f"{prefix}{c.chunk_id}.md": c for c in chunks}
             for key, c in wanted.items():

@@ -19,6 +19,7 @@ SIDECAR_SUFFIX = ".metadata.json"
 TARGET_CHARS = int(os.environ.get("CAREONEX_CHUNK_TARGET_CHARS", "1600"))
 MAX_CHARS = int(os.environ.get("CAREONEX_CHUNK_MAX_CHARS", "2800"))
 MIN_CHARS = int(os.environ.get("CAREONEX_CHUNK_MIN_CHARS", "200"))
+OVERLAP_CHARS = int(os.environ.get("CAREONEX_CHUNK_OVERLAP_CHARS", "120"))
 
 
 def session() -> boto3.Session:

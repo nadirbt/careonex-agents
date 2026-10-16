@@ -1,0 +1,26 @@
+{
+  "metadataAttributes": {
+    "source_id": "nj_doas",
+    "publisher": "NJ DHS Division of Aging Services (DoAS)",
+    "program": "Statewide Respite Care Program",
+    "title": "Respite Care Brochure",
+    "kind": "pdf",
+    "source_url": "https://www.nj.gov/humanservices/doas/documents/Statewide%20Respite%20Care%20Program%20Brochure%20(Web-English).pdf",
+    "final_url": "https://www.nj.gov/humanservices/doas/documents/Statewide%20Respite%20Care%20Program%20Brochure%20(Web-English).pdf",
+    "effective_date": "2026-03-12",
+    "effective_date_estimated": false,
+    "fetch_date": "2026-09-28",
+    "sha256": "29573271cf12d39a96cc5d1bc202f1ecfdf537d2c4817e940b2bfd9d51a3ec2c",
+    "jurisdiction": "NJ",
+    "county": "all",
+    "audience": "consumer",
+    "year": 2026,
+    "http_last_modified": "2026-03-12",
+    "derived_from": "raw/nj_doas/nj_doas_statewide_respite_brochure_en.pdf",
+    "source_sha256": "29573271cf12d39a96cc5d1bc202f1ecfdf537d2c4817e940b2bfd9d51a3ec2c",
+    "text_sha256": "779dcc85f1a3c961c73f64ad2f01028548d66c3b7a2b8d461023c3600618176e",
+    "extractor": "pymupdf4llm",
+    "extractor_version": "3",
+    "chars": 4123
+  }
+}

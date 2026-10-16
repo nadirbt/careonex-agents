@@ -1,0 +1,27 @@
+{
+  "metadataAttributes": {
+    "source_id": "medicare_cms",
+    "publisher": "Centers for Medicare & Medicaid Services (CMS) via Medicare.gov",
+    "program": "Medicare home health benefit",
+    "title": "Home Health Services Coverage",
+    "kind": "html",
+    "source_url": "https://www.medicare.gov/coverage/home-health-services",
+    "final_url": "https://www.medicare.gov/coverage/home-health-services",
+    "effective_date": "",
+    "effective_date_estimated": true,
+    "fetch_date": "2026-09-28",
+    "sha256": "f40bd8fa6a6e67865da53d021444a0d4b1b6d8569583ff117c6e40f7f4327e51",
+    "jurisdiction": "US",
+    "county": "all",
+    "audience": "consumer",
+    "year": 2026,
+    "http_last_modified": "2026-09-28",
+    "note": "no effective_date on page; set by hand",
+    "derived_from": "raw/medicare_cms/medicare_home_health_services_coverage.html",
+    "source_sha256": "e7725716d6b49398e2d9b1927de4e728bd6608e8ffe88df8424da2daf7a37546",
+    "text_sha256": "8cb4e5fd85d9db0687f112b86a0f488cb506dc9cea1b3ab1469658ad8fced92b",
+    "extractor": "markdownify",
+    "extractor_version": "3",
+    "chars": 6244
+  }
+}

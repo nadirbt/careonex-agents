@@ -1,5 +1,13 @@
-"""Amazon Nova 2 Sonic bidirectional streaming client."""
+"""Amazon Nova 2 Sonic bidirectional streaming client.
 
-from nova_sonic.session import NovaSonicSession
+Tool-only validation should not require the optional streaming SDK.
+"""
 
 __all__ = ["NovaSonicSession"]
+
+
+def __getattr__(name: str):
+    if name == "NovaSonicSession":
+        from nova_sonic.session import NovaSonicSession
+        return NovaSonicSession
+    raise AttributeError(name)
