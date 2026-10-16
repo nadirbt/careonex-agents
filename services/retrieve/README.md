@@ -42,10 +42,9 @@ Set `CAREONEX_RETRIEVE_SEARCH_MODE=intent` for an opt-in local server trial or p
 
 ## Live voice integration (model-free feedback)
 
-The Nova Sonic tool now submits `search_mode=feedback` explicitly by default,
-while this API's own default remains `baseline`. The feedback planner performs
+The Nova Sonic tool submits `search_mode=baseline` by default, like this API; set
+`CAREONEX_VOICE_SEARCH_MODE=feedback` on the voice process to opt in. The feedback planner performs
 its first `Retrieve` using the exact original question, may issue up to two
 heading-based supplemental searches, then combines ranking using RRF. No
-Bedrock text-model call is needed. Voice rollback: set
-`CAREONEX_VOICE_SEARCH_MODE=baseline` on the voice process. Details:
+Bedrock text-model call is needed. Details:
 [`../../VOICE_QUERY_EXPANSION_HANDOFF.md`](../../VOICE_QUERY_EXPANSION_HANDOFF.md).
