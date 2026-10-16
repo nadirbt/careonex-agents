@@ -53,3 +53,32 @@ def test_dry_run_writes_nothing(aws):
     assert s.counts == {"dry-run": 1}
     keys = [o["Key"] for o in aws.list_objects_v2(Bucket=bucket)["Contents"]]
     assert not any(k.startswith("text/") or k.startswith("snapshots/") for k in keys)
+
+
+def test_doas_table_failing_verification_falls_back_unverified(aws, monkeypatch):
+    import careonex_extract.extract as ex
+
+    def reject(*_a, **_k):
+        raise ValueError("unexpected DoAS Side-by-Side page count (3); manual verification required")
+
+    monkeypatch.setattr(ex, "to_markdown", reject)
+    monkeypatch.setattr(ex, "pdf_to_markdown", lambda data: "# DoAS Programs Side-by-Side\n\nplain text\n")
+    bucket = "ac215-program-kb-test"
+    aws.create_bucket(Bucket=bucket)
+    key = "raw/nj_doas/nj_doas_programs_side_by_side_2026.pdf"
+    seed(aws, bucket, key, b"%PDF-1.7", "sha-A", "pdf")
+    s = extract_all(aws, bucket, snapshot_id="s1")
+    assert s.counts == {"extracted": 1}
+    side = json.loads(aws.get_object(Bucket=bucket, Key=text_key_for(key) + ".metadata.json")["Body"].read())
+    assert "table_verified" not in side["metadataAttributes"]
+
+
+def test_other_documents_still_count_as_failed(aws, monkeypatch):
+    import careonex_extract.extract as ex
+
+    monkeypatch.setattr(ex, "to_markdown", lambda *a, **k: (_ for _ in ()).throw(ValueError("bad pdf")))
+    bucket = "ac215-program-kb-test"
+    aws.create_bucket(Bucket=bucket)
+    seed(aws, bucket, "raw/nj_doas/nj_doas_pace.pdf", b"%PDF-1.7", "sha-A", "pdf")
+    s = extract_all(aws, bucket, snapshot_id="s1")
+    assert s.counts == {"failed": 1}  # the CLI exits 1, so compose does not start chunk

@@ -59,7 +59,7 @@ Use the correct staging KB and bucket for your AWS environment. `feedback` mode 
 Ask the team which existing KB is approved for each environment. In a retrieval-only
 session, explicitly set `CAREONEX_KB_ID` to the approved KB and check the returned
 `knowledge_base_id` for a test retrieval before using it in the voice agent.
-Do not run `make run` or `kb-sync` just to test feedback; those can rebuild data.
+Do not run `just run` or `kb-sync` just to test feedback; those can rebuild data.
 
 ## Automated blind grading of the saved 40-question feedback run (Bedrock; no human review)
 

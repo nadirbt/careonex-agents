@@ -9,8 +9,18 @@ def _fake_response(*_args):
             "queries_used": ["q", "q expanded"], "latency_ms": 45}
 
 
-def test_voice_uses_feedback_by_default_without_model_call(monkeypatch):
+def test_voice_uses_baseline_by_default(monkeypatch):
     monkeypatch.delenv("CAREONEX_VOICE_SEARCH_MODE", raising=False)
+    monkeypatch.setattr(t, "RETRIEVE_URL", "http://retrieve:8080")
+    seen = []
+    monkeypatch.setattr(t, "_post_json", lambda url, payload, timeout: (seen.append(payload), _fake_response())[1])
+    t.lookup_program_info_sync({"query": "How do I apply for JACC?", "program": "JACC"})
+    assert seen[0]["search_mode"] == "baseline"
+    assert len(seen) == 1
+
+
+def test_voice_feedback_opt_in_without_model_call(monkeypatch):
+    monkeypatch.setenv("CAREONEX_VOICE_SEARCH_MODE", "feedback")
     monkeypatch.setattr(t, "RETRIEVE_URL", "http://retrieve:8080")
     seen = []
     monkeypatch.setattr(t, "_post_json", lambda url, payload, timeout: (seen.append(payload), _fake_response())[1])
@@ -42,7 +52,7 @@ def test_voice_invalid_mode_fails_closed_to_baseline(monkeypatch):
 
 
 def test_voice_feedback_preserves_caller_facts_and_parent_disabled(monkeypatch):
-    monkeypatch.delenv("CAREONEX_VOICE_SEARCH_MODE", raising=False)
+    monkeypatch.setenv("CAREONEX_VOICE_SEARCH_MODE", "feedback")
     monkeypatch.delenv("CAREONEX_VOICE_PARENT_CONTEXT", raising=False)
     monkeypatch.setattr(t, "RETRIEVE_URL", "http://retrieve:8080")
     seen = []

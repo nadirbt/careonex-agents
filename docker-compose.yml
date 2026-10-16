@@ -95,4 +95,6 @@ services:
     environment:
       <<: *aws-env
       CAREONEX_RETRIEVE_URL: http://retrieve:8080
+      # One Retrieve call per lookup by default; feedback opts in to model-free expansion (see services/voice/README.md).
+      CAREONEX_VOICE_SEARCH_MODE: ${CAREONEX_VOICE_SEARCH_MODE:-baseline}
     <<: *mounts

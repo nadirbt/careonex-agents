@@ -568,13 +568,11 @@ def lookup_program_info_sync(args: dict[str, Any]) -> dict:
     if county:
         facts.append(f"{county} County")
     payload = {"query": f"{query} ({'; '.join(facts)})" if facts else query, "top_k": 5}
-    # Voice factual home-care requests (not just program queries) use model-free feedback.
-    # It searches the caller's exact question first, derives at most two extra
-    # searches from relevant retrieved headings, and merges with RRF. The
-    # retrieval layer retains the baseline if planning or supplementary search
-    # fails; no Bedrock InvokeModel permission is required.
-    # Roll back instantly with CAREONEX_VOICE_SEARCH_MODE=baseline.
-    mode = os.environ.get("CAREONEX_VOICE_SEARCH_MODE", "feedback").strip().lower()
+    # Default is one Retrieve call per lookup (baseline): a single call already takes ~1.2 s against
+    # the 1 s turn target. CAREONEX_VOICE_SEARCH_MODE=feedback opts in to model-free feedback: the
+    # caller's exact question first, at most two extra searches derived from retrieved headings,
+    # merged with RRF. Switch the default once the eval shows the accuracy is worth the latency.
+    mode = os.environ.get("CAREONEX_VOICE_SEARCH_MODE", "baseline").strip().lower()
     if mode not in ("baseline", "feedback"):
         log.warning("unknown voice search mode %r; using baseline", mode)
         mode = "baseline"

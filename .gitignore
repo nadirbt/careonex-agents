@@ -37,3 +37,18 @@ CLAUDE.md
 # Voice intake records (caller PII)
 data/intakes/
 services/voice/data/
+
+# Evaluation runs and knowledge-base staging exports (generated; not reference fixtures)
+/voice-smoke*/
+/voice-text-evaluation.json
+/evaluation/batch_runs/
+/evaluation/batch_runs_to_review.zip
+/evaluation/*_result.json
+/evaluation/*_pilot.json
+/evaluation/*_full.json
+/evaluation/*_run.json
+/evaluation/reviews/
+/chunk_abc_export_ready/
+/chunk_abc_kbs/
+/chunk_abc_retrieval.json
+/chunk_abc_metrics.json

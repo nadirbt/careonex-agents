@@ -17,9 +17,11 @@ from pathlib import Path
 from botocore.exceptions import ClientError
 
 from careonex_extract.config import RAW_PREFIX, SIDECAR_SUFFIX, SNAPSHOT_PREFIX, TEXT_PREFIX
-from careonex_extract.convert import EXTRACTOR_VERSION, to_markdown
+from careonex_extract.convert import EXTRACTOR_VERSION, pdf_to_markdown, to_markdown
 
 log = logging.getLogger(__name__)
+
+DOAS_SIDE_BY_SIDE = "nj_doas_programs_side_by_side_2026.pdf"  # gets the geometry-verified table converter
 
 
 @dataclass
@@ -134,10 +136,20 @@ def extract_all(
             data = obj["Body"].read()
             if not item.raw_sha256:
                 item.raw_sha256 = hashlib.sha256(data).hexdigest()
-            md = to_markdown(data, attrs.get("kind", ""), raw_key, url=attrs.get("final_url") or attrs.get("source_url"))
-            # Only the geometry-verified six-column DoAS converter may assert this.
-            if Path(raw_key).name == "nj_doas_programs_side_by_side_2026.pdf":
-                attrs["table_verified"] = True
+            attrs.pop("table_verified", None)
+            try:
+                md = to_markdown(data, attrs.get("kind", ""), raw_key, url=attrs.get("final_url") or attrs.get("source_url"))
+                # Only the geometry-verified six-column DoAS converter may assert this.
+                if Path(raw_key).name == DOAS_SIDE_BY_SIDE:
+                    attrs["table_verified"] = True
+            except ValueError as exc:
+                if Path(raw_key).name != DOAS_SIDE_BY_SIDE:
+                    raise
+                # The table did not pass verification. Fall back to the plain converter without the
+                # table_verified mark: retrieve withholds those chunks, and the curated limits file
+                # still answers. One unverified PDF must not stop chunk and kb-sync from running.
+                log.warning("DoAS side-by-side table failed verification (%s); unverified fallback for %s", exc, raw_key)
+                md = pdf_to_markdown(data)
             item.text_sha256 = hashlib.sha256(md.encode("utf-8")).hexdigest()
             item.chars = len(md)
             item.text_changed = item.previous_text_sha256 is not None and item.previous_text_sha256 != item.text_sha256

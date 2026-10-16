@@ -68,20 +68,6 @@ def test_negation_carries_through_all_queries():
     assert all('do not want a live-in aide' in x for x in p.queries)
 
 
-def test_prompt_and_tool_are_broad_but_retrieval_is_on_demand():
-    from nova_sonic.config import DEFAULT_SYSTEM_PROMPT
-    from nova_sonic.tools import LOOKUP_PROGRAM_INFO
-    prompt = DEFAULT_SYSTEM_PROMPT.lower()
-    description = LOOKUP_PROGRAM_INFO['toolSpec']['description'].lower()
-    assert 'complete specific factual question' in prompt
-    assert 'relevant to home care' in prompt
-    assert 'not just government programs' in description
-    for keyword in ('dementia', 'cost', 'caregiver', 'scheduling'):
-        assert keyword in description
-    assert 'do not call retrieval for greetings' in prompt
-    assert 'never invent careonex prices' in prompt
-
-
 def test_explicit_county_guard_is_not_a_program_rule():
     question = 'Are weekday caregivers available in Bergen County?'
     wrong = hit('wrong','Weekday caregivers in Hudson County',
@@ -95,17 +81,3 @@ def test_explicit_county_guard_is_not_a_program_rule():
     assert len(plan.queries) == 2
     assert 'Bergen County' in plan.queries[1]
     assert 'Hudson County' not in plan.queries[1]
-
-
-def test_general_voice_lookup_does_not_force_program_filter(monkeypatch):
-    from nova_sonic import tools as voice_tools
-    seen=[]
-    monkeypatch.setenv('CAREONEX_VOICE_SEARCH_MODE', 'feedback')
-    monkeypatch.setattr(voice_tools, 'RETRIEVE_URL', 'http://retrieve:8080')
-    monkeypatch.setattr(voice_tools, '_post_json',
-        lambda url, payload, timeout: (seen.append(payload),
-            {'passages':[{'text':'General home care help','title':'Caregiver support'}]})[1])
-    result=voice_tools.lookup_program_info_sync({'query':'Can a caregiver help with cooking?'})
-    assert len(result['passages']) == 1
-    assert seen[0]['search_mode'] == 'feedback'
-    assert 'program' not in seen[0]

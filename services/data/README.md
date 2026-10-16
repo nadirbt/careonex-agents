@@ -41,10 +41,10 @@ chunks/<source_id>/<file_name>.jsonl         section-aware chunks (services/chun
 From the repo root, after `aws sso login --profile careonex-team` on the host:
 
 ```bash
-make build            # docker compose build
-make whoami           # prints the identity the container is using
-make run              # ensure-buckets, then ingest  (== docker compose up data ingest)
-make status           # bucket existence + settings
+just build            # docker compose build
+just whoami           # prints the identity the container is using
+just run              # ensure-buckets, then ingest  (== docker compose up data ingest)
+just status           # bucket existence + settings
 docker compose run --rm data ls raw/nj_doas/
 docker compose run --rm data ingest --dry-run        # fetch + hash, upload nothing
 docker compose run --rm data ingest --only nj_dmahs  # one publisher

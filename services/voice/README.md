@@ -7,7 +7,7 @@ the model's `lookup_program_info` tool calls by asking the `retrieve` service fo
 Two ways to run:
 
 ```bash
-# Container: mic-free smoke test (what `make smoke` runs). Needs the retrieve service up for a real
+# Container: mic-free smoke test (what `just smoke` runs). Needs the retrieve service up for a real
 # tool round trip; without CAREONEX_RETRIEVE_URL the tool reports "knowledge base unavailable" and
 # the model promises a follow-up, which still proves the protocol.
 docker compose run --rm voice
@@ -42,11 +42,10 @@ Intake is intended to proceed one question at a time. The agent should answer a 
 
 ## Model-free query expansion for voice lookups
 
-Voice `lookup_program_info` now requests `search_mode=feedback` by default.
-It searches the original question first, optionally makes up to two relevant
-heading-derived extra queries, and merges results with RRF. No Nova Lite
-permission is needed. To switch the **voice** back to single-query search,
-set `CAREONEX_VOICE_SEARCH_MODE=baseline` before starting the process.
+Voice `lookup_program_info` makes one Retrieve call per lookup by default (`baseline`), to stay
+near the 1 s turn target. Set `CAREONEX_VOICE_SEARCH_MODE=feedback` to opt in to model-free
+expansion: it searches the original question first, optionally makes up to two relevant
+heading-derived extra queries, and merges results with RRF. No Nova Lite permission is needed.
 See [`../../docs/EVALUATION.md`](../../docs/EVALUATION.md) for how to evaluate retrieval modes.
 
 ## Where does call data go?
