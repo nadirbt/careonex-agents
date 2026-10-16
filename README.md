@@ -114,4 +114,12 @@ Optional environment variables:
 
 Sessions last up to about 8 minutes. Close with `contentEnd` → `promptEnd` → `sessionEnd`.
 
+## Known issues
+
+- **2025 Medicaid figures in the 2026 DoAS side-by-side table.** The state's March 2026 PDF still prints the
+  2025 MLTSS income limit ($2,901) and 2025 Alzheimer's Adult Day limits. The retrieve service may tag those
+  passages as 2026 and offer them next to the correct 2026 figure ($2,982). Check after every knowledge-base
+  rebuild; details, check and fix options in
+  [`docs/KNOWN_ISSUE_DOAS_MIXED_YEARS.md`](docs/KNOWN_ISSUE_DOAS_MIXED_YEARS.md).
+
 Official samples: [amazon-nova-samples / amazon-nova-2-sonic](https://github.com/aws-samples/amazon-nova-samples/tree/main/speech-to-speech/amazon-nova-2-sonic).
