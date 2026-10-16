@@ -6,6 +6,10 @@ Purpose: every teammate runs the CareOneX voice agent locally against the **shar
 
 The app only needs permission to call one model, **Amazon Nova 2 Sonic**, in **us-east-1**. Nothing here touches the CareOneX phone line, API, database or recordings; the permission set cannot reach them.
 
+> **Ask the team before running `just run` against the shared account.** The pipeline uploads documents,
+> replaces indexed chunks and starts billed Knowledge Base ingestion jobs. Voice testing (`just smoke`, the
+> mic client) does not need it.
+
 ---
 
 ## What was set up
@@ -107,6 +111,7 @@ permission set for all five members keeps the laptop setup to a single profile.
 
 Still excluded on purpose: anything on `careonex-*`, IAM role creation, billing, and every Bedrock
 model other than Nova Sonic and the Titan embedding model.
+Nova Lite is not needed: the voice `feedback` search mode plans its extra queries without a model call.
 
 ### The `AC215-KnowledgeBaseRole` service role (owner creates once)
 
@@ -184,17 +189,17 @@ Open the AWS e-mail the same day; the link expires. If it has, use **Forgot pass
 
 ## Part C — Each teammate's laptop
 
-Prereqs: macOS with Homebrew, Python 3.11/3.12, this repo cloned.
+Prereqs: macOS with Homebrew (Windows: see C3), Docker Desktop, [`uv`](https://docs.astral.sh/uv/), this repo cloned.
+Every service requires Python 3.12; `uv` installs and selects it per service, so no system Python or
+shared venv is needed.
 
 ```bash
-brew install portaudio awscli
+brew install portaudio awscli just uv
 cd careonex-agents
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
+just test        # offline tests, every service
 ```
 
-> SSO resolution in the app uses **botocore**, which is installed automatically with `awscli`. If you skipped `awscli`, run `pip install botocore` inside the venv.
+> SSO resolution in the services uses **botocore**, which each service declares as a dependency; nothing extra to install.
 
 ### C1 — Configure the SSO profile (once)
 
@@ -219,7 +224,7 @@ aws sso login --profile careonex-team
 export AWS_PROFILE=careonex-team
 export AWS_DEFAULT_REGION=us-east-1
 aws sts get-caller-identity
-python -m nova_sonic
+cd services/voice && uv sync --extra mic && uv run careonex-voice   # interactive mic client
 ```
 
 `get-caller-identity` must print account **`<TEAM_ACCOUNT_ID>`** and an ARN whose role name contains **`AC215`**. Then the voice agent starts; speak after the "Listening" line.
@@ -239,6 +244,25 @@ SSO keys are temporary (8 hours). When they expire, re-run `aws sso login --prof
 - **`ExpiredToken` / `InvalidClientTokenId`.** Re-run `aws sso login --profile careonex-team`.
 - **`AccessDeniedException` from Bedrock.** Check the model id is `amazon.nova-2-sonic-v1:0` and the region is `us-east-1`. Any other model or region is refused by design.
 - The app's "Listening" line alone does **not** prove authentication; the first real error arrives when audio is sent.
+
+### C3 — Windows (PowerShell)
+
+Install the AWS CLI, Docker Desktop, `uv` and `just` (`winget install Casey.Just`). Configure the profile once
+with `aws configure sso` exactly as in C1, then for each working session:
+
+```powershell
+aws sso login --profile careonex-team
+$env:AWS_PROFILE = "careonex-team"
+$env:AWS_DEFAULT_REGION = "us-east-1"
+aws sts get-caller-identity
+```
+
+- **Docker Compose:** run `$env:HOME = $HOME` in every terminal where you run `docker compose` or `just`.
+  The compose file mounts `${HOME}/.aws` into the containers, and `HOME` is not set in PowerShell by default. Never copy `~/.aws` into an image or the repository.
+- **Python:** select 3.12 explicitly; `uv` otherwise picks the newest installed Python. For example
+  `uv run --python 3.12 --directory services/voice pytest -q`.
+- **Microphone client:** the Docker voice service only runs the prerecorded smoke test. Run the interactive
+  client on the host with `uv`, as in C2.
 
 ---
 
